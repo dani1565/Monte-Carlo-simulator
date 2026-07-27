@@ -1,0 +1,24 @@
+name: בדיקות איכות
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: משוך את הקוד
+        uses: actions/checkout@v4
+      - name: התקן את Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: התקן תלויות
+        run: npm install
+      - name: בדוק איכות קוד
+        run: npm run lint
+      - name: הרץ בדיקות
+        run: npm test
+      - name: בנה גרסת ייצור
+        run: npm run build
