@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test'
 
+test.beforeEach(async ({ page }) => {
+  await page.route('https://static.cloudflareinsights.com/**', async (route) => route.fulfill({
+    contentType: 'application/javascript',
+    body: '',
+  }))
+})
+
 test('מסביר למשתמש מה הסימולציה עושה ומה משמעות הפרמטרים', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'איך הסימולציה עובדת?' })).toBeVisible()
@@ -35,6 +42,14 @@ test('מציג הבהרה משפטית ברורה ונגישה', async ({ page }
   await expect(disclaimer.getByText(/אובדן מלוא ההשקעה/)).toBeVisible()
   expect(await disclaimer.evaluate((element) => getComputedStyle(element).fontSize)).toBe('14px')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+})
+
+test('טוען מדידת שימוש מצרפית ומציג גילוי פרטיות', async ({ page }) => {
+  await page.goto('/')
+
+  const beacon = page.locator('script[src="https://static.cloudflareinsights.com/beacon.min.js"]')
+  await expect(beacon).toHaveAttribute('data-cf-beacon', '{"token":"191b546809014f71a2a719eaa3bdfc51"}')
+  await expect(page.getByText(/נתוני שימוש מצרפיים.*Cloudflare Web Analytics.*ללא עוגיות/)).toBeVisible()
 })
 
 test('טוען סימולציה, משנה פרמטר ושומר אותו', async ({ page }) => {

@@ -77,3 +77,11 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - Added regression coverage for 2.5× and out-of-range color indexing.
 - Changed the Pages build job to install Chromium and run `check:release`, so deployment cannot proceed when browser tests fail.
 - Re-ran the complete release gate: 34/34 unit and component tests, production build, and 6/6 desktop/mobile browser scenarios passed.
+
+## 2026-08-13 — Privacy-first usage analytics
+
+- Owner approved Cloudflare Web Analytics for aggregate usage monitoring.
+- Added the Cloudflare beacon to the production HTML using the owner-provided public site token.
+- Added a concise Hebrew disclosure: aggregate usage data, no cookies, and no visitor profiling.
+- TDD evidence: the targeted desktop E2E test failed before the beacon/disclosure existed, then passed after implementation.
+- Scope is page-level traffic and performance analytics only; no simulation parameters, financial inputs, custom events, accounts, or personal profiles are collected by application code.
