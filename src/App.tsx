@@ -134,6 +134,7 @@ export default function App() {
             <ParameterField id="tradingDays" label="ימי מסחר בשנה" description="משמש להמרה מפרמטרים שנתיים ליומיים" unit="ימים" value={drafts.tradingDays} {...PARAMETER_LIMITS.tradingDays} error={validationErrors.tradingDays} onChange={(value) => updateNumber('tradingDays', value)} />
           </fieldset>
           <button className="run-button" onClick={runSimulation} disabled={running || hasValidationErrors}>{running ? 'מחשב תרחישים…' : 'הרץ סימולציה'}<span>←</span></button>
+          <p className="run-disclaimer">כלי כללי בלבד, ללא התאמה אישית ואינו תחליף לייעוץ מקצועי. מינוף עלול להביא לאובדן מלוא ההשקעה. <a href="#legal-disclaimer">להבהרה המשפטית המלאה</a></p>
           {hasValidationErrors && <p className="validation-summary" role="alert">יש לתקן את הערכים המסומנים לפני הרצת הסימולציה.</p>}
           {running && <div className="progress-track" role="progressbar" aria-valuenow={Math.round(progress * 100)}><span style={{ width: `${progress * 100}%` }} /></div>}
           {error && <p className="error" role="alert">{error}</p>}
@@ -157,7 +158,12 @@ export default function App() {
           </> : <LoadingCards />}
         </section>
       </div>
-      <footer><p>כלי מחקרי בלבד · אינו מהווה ייעוץ השקעות</p><p>התוצאות הן סימולציה סטטיסטית ואינן תחזית</p></footer>
+      <section id="legal-disclaimer" className="legal-disclaimer" role="note" aria-labelledby="legal-disclaimer-title">
+        <h2 id="legal-disclaimer-title">הבהרה משפטית</h2>
+        <p>האתר והסימולטור נועדו למידע, לימוד והמחשה בלבד. אין בתוכן משום ייעוץ השקעות או שיווק השקעות, ואין בו הצעה או המלצה לבצע פעולה כלשהי או להימנע מביצועה. המידע אינו מותאם לנתוניו, למטרותיו ולצרכיו של אדם מסוים ואינו תחליף לייעוץ השקעות אישי המתחשב בהם מאת בעל רישיון מתאים על פי דין.</p>
+        <p>התוצאות מבוססות על הנחות ועל מסלולים אקראיים, ואינן תחזית או הבטחה לתוצאה עתידית. השקעה, ובפרט השקעה ממונפת, כרוכה בסיכון להפסד עד כדי אובדן מלוא ההשקעה.</p>
+      </section>
+      <footer><p>כלי מידע ומחקר כללי בלבד</p><p>התוצאות הן סימולציה סטטיסטית ואינן תחזית</p></footer>
     </main>
   )
 }

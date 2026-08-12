@@ -21,6 +21,22 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
 })
 
+test('מציג הבהרה משפטית ברורה ונגישה', async ({ page }) => {
+  await page.goto('/')
+  const disclaimer = page.getByRole('note', { name: 'הבהרה משפטית' })
+  await expect(disclaimer).toBeVisible()
+  await expect(disclaimer).toHaveAttribute('id', 'legal-disclaimer')
+  await expect(page.getByRole('link', { name: 'להבהרה המשפטית המלאה' })).toHaveAttribute('href', '#legal-disclaimer')
+  await expect(disclaimer.getByText(/אין בתוכן משום ייעוץ השקעות או שיווק השקעות/)).toBeVisible()
+  await expect(disclaimer.getByText(/אין בו הצעה או המלצה לבצע פעולה כלשהי או להימנע מביצועה/)).toBeVisible()
+  await expect(disclaimer.getByText(/אינו תחליף לייעוץ השקעות אישי.*בעל רישיון/)).toBeVisible()
+  await expect(disclaimer.getByText(/נתוניו, למטרותיו ולצרכיו/)).toBeVisible()
+  await expect(disclaimer.getByText(/אינן תחזית או הבטחה לתוצאה עתידית/)).toBeVisible()
+  await expect(disclaimer.getByText(/אובדן מלוא ההשקעה/)).toBeVisible()
+  expect(await disclaimer.evaluate((element) => getComputedStyle(element).fontSize)).toBe('14px')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+})
+
 test('טוען סימולציה, משנה פרמטר ושומר אותו', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
