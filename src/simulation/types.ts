@@ -1,13 +1,14 @@
 export interface SimulationParams {
+  initialInvestment: number
   leverages: number[]
   years: number
   paths: number
   annualDrift: number
   annualVolatility: number
   degreesOfFreedom: number
-  ruinThreshold: number
   cvarPercentile: number
   seed: number
+  tradingDays: number
 }
 
 export interface TimePoint {
@@ -21,8 +22,8 @@ export interface TimePoint {
 }
 
 export interface SamplePath {
-  ruined: boolean
-  ruinYear?: number
+  wipedOut: boolean
+  wipeoutYear?: number
   values: number[]
 }
 
@@ -34,7 +35,7 @@ export interface HistogramBin {
 
 export interface LeverageResult {
   leverage: number
-  ruinRate: number
+  wipeoutRate: number
   mean: number
   median: number
   cvar: number
@@ -43,7 +44,7 @@ export interface LeverageResult {
   timeline: TimePoint[]
   samples: SamplePath[]
   histogram: HistogramBin[]
-  ruinedCount: number
+  wipedOutCount: number
 }
 
 export interface SimulationResult {

@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react'
 import type { LeverageResult } from '../simulation/types'
-
-const colors = ['#51e5b4', '#5da9ff', '#f5c15d', '#b989ff', '#ff7a81']
+import { leverageColor, toInvestmentMultiple } from './chartMath'
 
 interface ChartProps {
   results: LeverageResult[]
   selected: number
+  initialInvestment: number
 }
 
 function setupCanvas(canvas: HTMLCanvasElement) {
@@ -18,13 +18,14 @@ function setupCanvas(canvas: HTMLCanvasElement) {
   return { context, width: rect.width, height: rect.height }
 }
 
-export function PathChart({ results, selected }: ChartProps) {
+export function PathChart({ results, selected, initialInvestment }: ChartProps) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     if (!ref.current || !results.length) return
     const { context: ctx, width, height } = setupCanvas(ref.current)
     const pad = { top: 22, right: 58, bottom: 36, left: 20 }
-    const allPoints = results.flatMap((result) => result.timeline.flatMap((point) => [point.p5, point.p95, point.mean]))
+    const asMultiple = (value: number) => toInvestmentMultiple(value, initialInvestment)
+    const allPoints = results.flatMap((result) => result.timeline.flatMap((point) => [point.p5, point.p95, point.mean].map(asMultiple)))
     const maximum = Math.max(2, ...allPoints.filter(Number.isFinite))
     const minLog = -2
     const maxLog = Math.log10(maximum)
@@ -43,20 +44,20 @@ export function PathChart({ results, selected }: ChartProps) {
     }
 
     results.forEach((result, resultIndex) => {
-      const color = colors[Math.max(0, result.leverage - 1) % colors.length]
+      const color = leverageColor(result.leverage)
       const points = result.timeline
       ctx.globalAlpha = result.leverage === selected ? 1 : 0.42
       ctx.fillStyle = `${color}18`
       ctx.beginPath()
-      points.forEach((point, index) => index ? ctx.lineTo(x(point.year), y(point.p75)) : ctx.moveTo(x(point.year), y(point.p75)))
-      [...points].reverse().forEach((point) => ctx.lineTo(x(point.year), y(point.p25)))
+      points.forEach((point, index) => index ? ctx.lineTo(x(point.year), y(asMultiple(point.p75))) : ctx.moveTo(x(point.year), y(asMultiple(point.p75))))
+      ;[...points].reverse().forEach((point) => ctx.lineTo(x(point.year), y(asMultiple(point.p25))))
       ctx.closePath(); ctx.fill()
-      drawLine(ctx, points.map((point) => [x(point.year), y(point.median)]), color, 2.4)
-      drawLine(ctx, points.map((point) => [x(point.year), y(point.mean)]), color, 1.2, [5, 4])
+      drawLine(ctx, points.map((point) => [x(point.year), y(asMultiple(point.median))]), color, 2.4)
+      drawLine(ctx, points.map((point) => [x(point.year), y(asMultiple(point.mean))]), color, 1.2, [5, 4])
       if (resultIndex === 0 || result.leverage === selected) {
         result.samples.slice(0, 12).forEach((sample) => {
-          const until = sample.ruined ? Math.min(sample.values.length, Math.ceil(sample.ruinYear ?? sample.values.length)) : sample.values.length
-          drawLine(ctx, sample.values.slice(0, until).map((value, index) => [x(index), y(value)]), sample.ruined ? '#ff6b72' : color, .55)
+          const until = sample.wipedOut ? Math.min(sample.values.length, Math.ceil(sample.wipeoutYear ?? sample.values.length)) : sample.values.length
+          drawLine(ctx, sample.values.slice(0, until).map((value, index) => [x(index), y(asMultiple(value))]), sample.wipedOut ? '#ff6b72' : color, .55)
         })
       }
     })
@@ -65,11 +66,11 @@ export function PathChart({ results, selected }: ChartProps) {
     for (let year = 0; year <= results[0].timeline.at(-1)!.year; year += Math.max(1, Math.ceil(results[0].timeline.at(-1)!.year / 5))) {
       ctx.fillText(`${year}`, x(year), height - 12)
     }
-  }, [results, selected])
+  }, [results, selected, initialInvestment])
   return <canvas ref={ref} className="chart-canvas" aria-label="גרף מסלולי ההשקעה לאורך זמן" />
 }
 
-export function DistributionChart({ results, selected }: ChartProps) {
+export function DistributionChart({ results, selected, initialInvestment }: ChartProps) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     if (!ref.current || !results.length) return
@@ -77,7 +78,7 @@ export function DistributionChart({ results, selected }: ChartProps) {
     const { context: ctx, width, height } = setupCanvas(ref.current)
     const pad = { top: 20, right: 45, bottom: 42, left: 20 }
     const bins = result.histogram
-    const maxCount = Math.max(1, result.ruinedCount, ...bins.map((bin) => bin.count))
+    const maxCount = Math.max(1, result.wipedOutCount, ...bins.map((bin) => bin.count))
     const totalBars = bins.length + 1
     const available = width - pad.right - pad.left
     const barWidth = available / totalBars
@@ -93,15 +94,15 @@ export function DistributionChart({ results, selected }: ChartProps) {
       ctx.fillStyle = color
       ctx.fillRect(pad.right + index * barWidth + 1, height - pad.bottom - barHeight, Math.max(1, barWidth - 2), barHeight)
     }
-    drawBar(0, result.ruinedCount, '#ff6b72')
-    bins.forEach((bin, index) => drawBar(index + 1, bin.count, '#51e5b4'))
+    drawBar(0, result.wipedOutCount, '#ff6b72')
+    bins.forEach((bin, index) => drawBar(index + 1, bin.count, leverageColor(result.leverage)))
     ctx.fillStyle = '#9aaba7'; ctx.textAlign = 'center'
-    ctx.fillText('חורבן', pad.right + barWidth / 2, height - 18)
+    ctx.fillText('מחיקה', pad.right + barWidth / 2, height - 18)
     if (bins.length) {
-      ctx.fillText(formatMultiple(bins[0].from), pad.right + barWidth * 1.5, height - 18)
-      ctx.fillText(formatMultiple(bins.at(-1)!.to), width - pad.left - barWidth / 2, height - 18)
+      ctx.fillText(formatMultiple(toInvestmentMultiple(bins[0].from, initialInvestment)), pad.right + barWidth * 1.5, height - 18)
+      ctx.fillText(formatMultiple(toInvestmentMultiple(bins.at(-1)!.to, initialInvestment)), width - pad.left - barWidth / 2, height - 18)
     }
-  }, [results, selected])
+  }, [results, selected, initialInvestment])
   return <canvas ref={ref} className="chart-canvas histogram" aria-label="התפלגות השווי הסופי" />
 }
 
