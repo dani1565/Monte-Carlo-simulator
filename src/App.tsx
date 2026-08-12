@@ -106,6 +106,8 @@ export default function App() {
         <p className="hero-copy">בדקו אלפי מסלולי שוק עם זנבות שמנים, מינוף יומי ואפשרות למחיקה מלאה. כי אף משקיע לא חי בתוך הממוצע.</p>
       </section>
 
+      <SimulationIntroduction />
+
       <section className="preset-strip" aria-label="תרחישים מוכנים">
         {presets.map((preset) => <button key={preset.name} onClick={() => replaceParams({ ...params, ...preset.values })}><strong>{preset.name}</strong><span>{preset.description}</span></button>)}
       </section>
@@ -119,7 +121,7 @@ export default function App() {
             <ParameterField id="initialInvestment" label="סכום התחלתי" description="שווי התיק בתחילת הדרך" unit="₪" value={drafts.initialInvestment} {...PARAMETER_LIMITS.initialInvestment} error={validationErrors.initialInvestment} onChange={(value) => updateNumber('initialInvestment', value)} />
             <ParameterField id="years" label="טווח השקעה" description="משך הסימולציה" unit="שנים" value={drafts.years} {...PARAMETER_LIMITS.years} range error={validationErrors.years} onChange={(value) => updateNumber('years', value)} />
             <ParameterField id="paths" label="מספר מסלולים" description={`דגימות אקראיות · ${computeLabel}`} unit="מסלולים" value={drafts.paths} {...PARAMETER_LIMITS.paths} range error={validationErrors.paths} onChange={(value) => updateNumber('paths', value)} />
-            <ParameterField id="annualDrift" label="תשואה שנתית צפויה" description="הנחת הממוצע השנתי" unit="%" value={drafts.annualDrift} min={-100} max={100} step={0.1} range error={validationErrors.annualDrift} onChange={(value) => updateNumber('annualDrift', value, 100)} />
+            <ParameterField id="annualDrift" label="תשואה שנתית צפויה" description="קצב שנתי לחישוב רכיב התשואה היומי" unit="%" value={drafts.annualDrift} min={-100} max={100} step={0.1} range error={validationErrors.annualDrift} onChange={(value) => updateNumber('annualDrift', value, 100)} />
             <ParameterField id="annualVolatility" label="תנודתיות שנתית" description="סטיית התקן השנתית" unit="%" value={drafts.annualVolatility} min={0} max={200} step={0.1} range error={validationErrors.annualVolatility} onChange={(value) => updateNumber('annualVolatility', value, 100)} />
             <ParameterField id="leverages" label="רמות מינוף להשוואה" description="הפרידו ערכים בפסיקים, למשל 1, 2.5, 4" unit="×" inputType="text" value={drafts.leverages} min={PARAMETER_LIMITS.leverage.min} max={PARAMETER_LIMITS.leverage.max} step={PARAMETER_LIMITS.leverage.step} error={validationErrors.leverages} onChange={updateLeverages} />
           </fieldset>
@@ -158,6 +160,41 @@ export default function App() {
       <footer><p>כלי מחקרי בלבד · אינו מהווה ייעוץ השקעות</p><p>התוצאות הן סימולציה סטטיסטית ואינן תחזית</p></footer>
     </main>
   )
+}
+
+const parameterExplanations = [
+  ['סכום התחלתי', 'הסכום שממנו מתחיל כל מסלול. התוצאות מוצגות גם בשקלים וגם כמכפיל של סכום זה.'],
+  ['טווח השקעה', 'מספר השנים שכל מסלול מדמה. אופק ארוך יוצר יותר ימי מסחר ויותר אפשרויות לתוצאות שונות.'],
+  ['מספר מסלולים', 'מספר ההרצות האקראיות הנפרדות. יותר מסלולים נותנים תמונה יציבה יותר, אך דורשים יותר זמן חישוב.'],
+  ['תשואה שנתית צפויה', 'קצב התשואה השנתי שמשמש לחישוב רכיב התשואה היומי. זו הנחת מודל — לא התשואה השנתית שתתקבל בפועל ולא תחזית.'],
+  ['תנודתיות שנתית', 'מידת הפיזור של התשואות סביב הממוצע. ערך גבוה מייצר עליות וירידות חדות יותר.'],
+  ['רמות מינוף', 'המכפילים שמושווים זה לזה. המינוף מוחל על התשואה היומית ולכן גם הפסדים ותנודתיות מוגברים.'],
+  ['עובי הזנבות', 'פרמטר טכני של התפלגות Student-t ששולט בתדירות של ימים קיצוניים. פחות דרגות חופש פירושן יותר אירועים חריגים.'],
+  ['זנב CVaR', 'האחוז מהתוצאות הסופיות הגרועות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הגרועים ביותר.'],
+  ['זרע אקראי', 'מספר שמאפשר לשחזר בדיוק את אותה סדרת הגרלות ולהשוות שינויים בתנאים.'],
+  ['ימי מסחר בשנה', 'מספר הצעדים היומיים בכל שנת סימולציה; משמש להמרת תשואה ותנודתיות שנתיות לערכים יומיים.'],
+] as const
+
+function SimulationIntroduction() {
+  return <section className="simulation-intro" aria-labelledby="simulation-intro-title">
+    <div className="intro-heading"><p className="eyebrow">לפני שמתחילים</p><h2 id="simulation-intro-title">איך הסימולציה עובדת?</h2><p>הכלי יוצר אלפי <strong>מסלולי מדד סינתטיים</strong>: בכל יום מסחר הוא מגריל תשואה אקראית לפי ההנחות שבחרתם, מחיל עליה כל רמת מינוף, וחוזר על התהליך עד סוף תקופת ההשקעה.</p><p>לאחר כל ההרצות הוא מסכם את טווח התוצאות — חציון, ממוצע, סיכון למחיקה מלאה ו־CVaR — כדי להראות לא רק מה עשוי לקרות בממוצע, אלא גם מה קורה בתרחישים קשים.</p></div>
+    <ol className="simulation-steps" aria-label="שלבי הסימולציה" role="list">
+      <li><span>1</span><div><strong>בוחרים הנחות</strong><p>סכום, שנים, תשואה, תנודתיות, מינוף ושאר הפרמטרים.</p></div></li>
+      <li><span>2</span><div><strong>מגרילים אלפי מסלולים</strong><p>כל מסלול הוא עתיד אפשרי ועצמאי של תשואות מדד יומיות.</p></div></li>
+      <li><span>3</span><div><strong>משווים את התוצאות</strong><p>בודקים תוצאה טיפוסית, פיזור, תרחישי קצה ומחיקה מלאה.</p></div></li>
+    </ol>
+    <aside className="history-comparison" aria-labelledby="history-comparison-title">
+      <h3 id="history-comparison-title">למה לא להסתפק בהרצה היסטורית?</h3>
+      <p>ההיסטוריה מראה לנו רק מסלול אחד שהתממש מתוך מסלולים רבים שהיו יכולים להתממש. בדיקה היסטורית (Backtest) מספרת מה קרה בתקופה מסוימת; סימולציית מונטה קרלו מרחיבה את המבט ובודקת אלפי עתידים אפשריים תחת אותן הנחות.</p>
+      <p>לחשיבה על העתיד זה מועיל במיוחד, משום שתשואות העבר אינן מבטיחות את תשואות העתיד ואינן לבדן בסיס אמין לחיזוי שלהן. הרעיון קשור לאזהרה שבספר <cite>“הברבור השחור”</cite> של נאסים ניקולס טאלב מפני הסתמכות־יתר על מה שכבר נצפה ועל סיפורים שנראים ברורים רק בדיעבד.</p>
+      <p><strong>אבל זו לא מכונת נבואה:</strong> גם סימולציה מוגבלת להנחות שהוזנו. היא מרחיבה את מגוון האפשרויות ביחס למסלול היסטורי יחיד, אך אינה יכולה להבטיח שתכלול אירוע קיצוני שהמודל לא מייצג.</p>
+    </aside>
+    <p className="model-warning"><strong>חשוב:</strong> זו סימולציה הסתברותית המבוססת על הנחות. היא אינה שחזור של ההיסטוריה, אינה משתמשת בנתוני שוק חיים ואינה תחזית או ייעוץ השקעות.</p>
+    <details className="parameter-glossary" aria-label="מה אומר כל פרמטר?">
+      <summary>מה אומר כל פרמטר?</summary>
+      <div className="glossary-grid">{parameterExplanations.map(([term, explanation]) => <article key={term}><h3>{term}</h3><p>{explanation}</p></article>)}</div>
+    </details>
+  </section>
 }
 
 function MetricCard({ item, initialInvestment, active, onClick }: { item: SimulationResult['results'][number]; initialInvestment: number; active: boolean; onClick: () => void }) {
