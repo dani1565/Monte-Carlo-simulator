@@ -8,6 +8,12 @@ describe('שמירה ושיתוף פרמטרים', () => {
     expect(decodeParams(encodeParams(params))).toEqual(params)
   })
 
+  it('טוען קישור ישן ומוסיף את ברירת המחדל של הזנב החיובי', () => {
+    const legacy = new URLSearchParams(encodeParams(DEFAULT_SIMULATION_PARAMS))
+    legacy.delete('positiveTailPercentile')
+    expect(decodeParams(legacy.toString())).toEqual(DEFAULT_SIMULATION_PARAMS)
+  })
+
   it('דוחה URL חלקי או לא תקין', () => {
     expect(decodeParams('years=0&paths=abc')).toBeNull()
     expect(decodeParams('')).toBeNull()

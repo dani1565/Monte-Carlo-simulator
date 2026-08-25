@@ -15,6 +15,7 @@ export function validateSimulationParams(params: SimulationParams): ValidationEr
   if (!inRange(params.annualVolatility, PARAMETER_LIMITS.annualVolatility.min, PARAMETER_LIMITS.annualVolatility.max)) errors.annualVolatility = 'התנודתיות השנתית חייבת להיות בין 0% ל־200%'
   if (!inRange(params.degreesOfFreedom, PARAMETER_LIMITS.degreesOfFreedom.min, PARAMETER_LIMITS.degreesOfFreedom.max)) errors.degreesOfFreedom = 'דרגות החופש חייבות להיות גדולות מ־2 ועד 100'
   if (!inRange(params.cvarPercentile, PARAMETER_LIMITS.cvarPercentile.min, PARAMETER_LIMITS.cvarPercentile.max)) errors.cvarPercentile = 'אחוזון CVaR חייב להיות בין 1% ל־25%'
+  if (!inRange(params.positiveTailPercentile, PARAMETER_LIMITS.positiveTailPercentile.min, PARAMETER_LIMITS.positiveTailPercentile.max)) errors.positiveTailPercentile = 'אחוז הזנב החיובי חייב להיות בין 1% ל־25%'
   if (!inRange(params.seed, PARAMETER_LIMITS.seed.min, PARAMETER_LIMITS.seed.max) || !Number.isInteger(params.seed)) errors.seed = 'ה־seed חייב להיות מספר שלם בין 0 ל־4,294,967,295'
   if (!inRange(params.tradingDays, PARAMETER_LIMITS.tradingDays.min, PARAMETER_LIMITS.tradingDays.max) || !Number.isInteger(params.tradingDays)) errors.tradingDays = 'מספר ימי המסחר חייב להיות מספר שלם בין 1 ל־366'
   const validLeverages = params.leverages.length > 0 && params.leverages.every((value) => inRange(value, PARAMETER_LIMITS.leverage.min, PARAMETER_LIMITS.leverage.max))

@@ -26,7 +26,7 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
   const glossary = page.getByRole('group', { name: 'מה אומר כל פרמטר?' })
   await glossary.getByText('מה אומר כל פרמטר?', { exact: true }).focus()
   await page.keyboard.press('Enter')
-  for (const term of ['סכום התחלתי', 'טווח השקעה', 'מספר מסלולים', 'תשואה שנתית צפויה', 'תנודתיות שנתית', 'רמות מינוף', 'עובי הזנבות', 'זנב CVaR', 'זרע אקראי', 'ימי מסחר בשנה']) {
+  for (const term of ['סכום התחלתי', 'טווח השקעה', 'מספר מסלולים', 'תשואה שנתית צפויה', 'תנודתיות שנתית', 'רמות מינוף', 'עובי הזנבות', 'זנב CVaR', 'זנב חיובי', 'זרע אקראי', 'ימי מסחר בשנה']) {
     await expect(glossary.getByText(term, { exact: true })).toBeVisible()
   }
   await expect(glossary.getByText(/הסכום שממנו מתחיל כל מסלול/)).toBeVisible()
@@ -86,10 +86,11 @@ test('פרמטרים מלאים נטענים מקישור משותף', async ({ 
   const query = new URLSearchParams({
     initialInvestment: '42000', leverages: '1,2.5', years: '2', paths: '100',
     annualDrift: '0.07', annualVolatility: '0.15', degreesOfFreedom: '6',
-    cvarPercentile: '0.05', seed: '77', tradingDays: '250',
+    cvarPercentile: '0.05', positiveTailPercentile: '0.1', seed: '77', tradingDays: '250',
   })
   await page.goto(`/?${query}`)
   await expect(page.getByLabel('סכום התחלתי')).toHaveValue('42000')
   await expect(page.getByLabel('רמות מינוף להשוואה')).toHaveValue('1, 2.5')
+  await expect(page.getByRole('spinbutton', { name: 'זנב חיובי' })).toHaveValue('10')
   await expect(page.getByText(/100 מסלולים · 2 שנים/)).toBeVisible({ timeout: 20_000 })
 })

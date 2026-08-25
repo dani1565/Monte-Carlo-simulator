@@ -91,3 +91,10 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - Renamed the public product name from "מסלול" to "מבחן המינוף" in the in-app heading, browser title, and README.
 - Added desktop and mobile browser coverage that verifies both the visible H1 and the document title.
 - TDD evidence: the new browser test failed against the former name, then passed after the rename.
+
+## 2026-08-26 — Positive-tail average
+
+- Added a user-editable positive-tail percentage (1%–25%, default 5%), independent of the existing CVaR percentage.
+- The simulator now calculates the average final value among the selected X% best paths and shows it beside CVaR as “ממוצע זנב חיובי”.
+- Added Hebrew descriptions in the control, parameter glossary, and mathematical-model documentation; URL sharing and local persistence include the new parameter.
+- TDD evidence: targeted statistics, engine, validation, storage, and browser tests were first observed failing, then passed after implementation.

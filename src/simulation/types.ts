@@ -7,6 +7,7 @@ export interface SimulationParams {
   annualVolatility: number
   degreesOfFreedom: number
   cvarPercentile: number
+  positiveTailPercentile: number
   seed: number
   tradingDays: number
 }
@@ -39,6 +40,7 @@ export interface LeverageResult {
   mean: number
   median: number
   cvar: number
+  positiveTailAverage: number
   annualizedMedian: number
   percentiles: { p5: number; p25: number; p75: number; p95: number }
   timeline: TimePoint[]

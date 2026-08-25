@@ -1,5 +1,5 @@
 import { SeededRandom } from './random'
-import { createHistogram, expectedShortfall, mean, percentile } from './statistics'
+import { createHistogram, expectedShortfall, expectedUpside, mean, percentile } from './statistics'
 import type { LeverageResult, SamplePath, SimulationParams, SimulationResult, TimePoint } from './types'
 
 const SAMPLE_COUNT = 32
@@ -56,6 +56,7 @@ export function simulate(params: SimulationParams, onProgress?: (progress: numbe
       mean: mean(finals),
       median,
       cvar: expectedShortfall(finals, params.cvarPercentile),
+      positiveTailAverage: expectedUpside(finals, params.positiveTailPercentile),
       annualizedMedian: median > 0 ? Math.pow(median / params.initialInvestment, 1 / params.years) - 1 : -1,
       percentiles: {
         p5: percentile(finals, 0.05), p25: percentile(finals, 0.25),
