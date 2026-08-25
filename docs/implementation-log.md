@@ -85,3 +85,9 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - Added a concise Hebrew disclosure: aggregate usage data, no cookies, and no visitor profiling.
 - TDD evidence: the targeted desktop E2E test failed before the beacon/disclosure existed, then passed after implementation.
 - Scope is page-level traffic and performance analytics only; no simulation parameters, financial inputs, custom events, accounts, or personal profiles are collected by application code.
+
+## 2026-08-26 — Brand rename
+
+- Renamed the public product name from "מסלול" to "מבחן המינוף" in the in-app heading, browser title, and README.
+- Added desktop and mobile browser coverage that verifies both the visible H1 and the document title.
+- TDD evidence: the new browser test failed against the former name, then passed after the rename.

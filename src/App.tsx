@@ -97,7 +97,7 @@ export default function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div className="brand-group"><div className="brand-mark">מ</div><div><h1>מסלול</h1><p>מעבדת סיכון ממונף</p></div></div>
+        <div className="brand-group"><div className="brand-mark">מ</div><div><h1>מבחן המינוף</h1><p>מעבדת סיכון ממונף</p></div></div>
         <div className="status-pill"><span className={running ? 'pulse' : ''} />{running ? `מחשב · ${Math.round(progress * 100)}%` : 'המודל מוכן'}</div>
       </header>
 
