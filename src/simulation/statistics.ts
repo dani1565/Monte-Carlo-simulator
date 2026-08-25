@@ -19,6 +19,12 @@ export function expectedShortfall(sortedValues: number[], percentileValue: numbe
   return mean(sortedValues.slice(0, count))
 }
 
+export function expectedUpside(sortedValues: number[], percentileValue: number): number {
+  if (!sortedValues.length) return 0
+  const count = Math.max(1, Math.ceil(sortedValues.length * percentileValue))
+  return mean(sortedValues.slice(-count))
+}
+
 export function createHistogram(values: number[], binCount = 28): HistogramBin[] {
   const positive = values.filter((value) => value > 0)
   if (!positive.length) return []

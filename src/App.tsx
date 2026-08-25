@@ -129,6 +129,7 @@ export default function App() {
             <legend>הגדרות מתקדמות</legend>
             <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={tailLabel(params.degreesOfFreedom)} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
             <ParameterField id="cvarPercentile" label="זנב CVaR" description="שיעור התרחישים הגרועים" unit="%" value={drafts.cvarPercentile} min={1} max={25} step={1} range error={validationErrors.cvarPercentile} onChange={(value) => updateNumber('cvarPercentile', value, 100)} />
+            <ParameterField id="positiveTailPercentile" label="זנב חיובי" description="שיעור התרחישים הטובים ביותר שממוצעם מוצג" unit="%" value={drafts.positiveTailPercentile} min={1} max={25} step={1} range error={validationErrors.positiveTailPercentile} onChange={(value) => updateNumber('positiveTailPercentile', value, 100)} />
             <ParameterField id="seed" label="זרע אקראי" description="לשחזור אותה סדרת תרחישים" unit="seed" value={drafts.seed} {...PARAMETER_LIMITS.seed} error={validationErrors.seed} onChange={(value) => updateNumber('seed', value)} />
             <button className="random-seed" type="button" onClick={() => updateNumber('seed', String(Math.floor(Math.random() * 1_000_000)))}>↻ צור מדגם חדש</button>
             <ParameterField id="tradingDays" label="ימי מסחר בשנה" description="משמש להמרה מפרמטרים שנתיים ליומיים" unit="ימים" value={drafts.tradingDays} {...PARAMETER_LIMITS.tradingDays} error={validationErrors.tradingDays} onChange={(value) => updateNumber('tradingDays', value)} />
@@ -154,7 +155,10 @@ export default function App() {
               <ChartHeader title="התפלגות השווי הסופי" subtitle="כל עמודה מייצגת טווח תוצאות · ציר שווי לוגריתמי" results={result.results} selected={selectedLeverage} onSelect={setSelectedLeverage} />
               <DistributionChart results={result.results} selected={selectedLeverage} initialInvestment={result.params.initialInvestment} />
             </div>
-            {selectedResult && <div className="tail-panel"><div><p className="eyebrow">התרחיש הרע</p><h3>אם נופלים לזנב, כמה כואב?</h3><p>ב־{result.params.cvarPercentile * 100}% התרחישים הגרועים, השווי הסופי הממוצע הוא <b>{formatCurrency(selectedResult.cvar)}</b> ({formatMultiple(selectedResult.cvar / result.params.initialInvestment)}).</p></div><div className="tail-number">{formatCurrency(selectedResult.cvar)}<small>CVaR</small></div></div>}
+            {selectedResult && <div className="tail-panels">
+              <div className="tail-panel"><div><p className="eyebrow">התרחיש הרע</p><h3>אם נופלים לזנב, כמה כואב?</h3><p>ב־{result.params.cvarPercentile * 100}% התרחישים הגרועים, השווי הסופי הממוצע הוא <b>{formatCurrency(selectedResult.cvar)}</b> ({formatMultiple(selectedResult.cvar / result.params.initialInvestment)}).</p></div><div className="tail-number">{formatCurrency(selectedResult.cvar)}<small>CVaR</small></div></div>
+              <div className="tail-panel positive-tail"><div><p className="eyebrow">התרחיש הטוב</p><h3>מה קורה בזנב החיובי?</h3><p>ב־{result.params.positiveTailPercentile * 100}% התרחישים הטובים ביותר, השווי הסופי הממוצע הוא <b>{formatCurrency(selectedResult.positiveTailAverage)}</b> ({formatMultiple(selectedResult.positiveTailAverage / result.params.initialInvestment)}).</p></div><div className="tail-number">{formatCurrency(selectedResult.positiveTailAverage)}<small>ממוצע זנב חיובי</small></div></div>
+            </div>}
           </> : <LoadingCards />}
         </section>
       </div>
@@ -178,6 +182,7 @@ const parameterExplanations = [
   ['רמות מינוף', 'המכפילים שמושווים זה לזה. המינוף מוחל על התשואה היומית ולכן גם הפסדים ותנודתיות מוגברים.'],
   ['עובי הזנבות', 'פרמטר טכני של התפלגות Student-t ששולט בתדירות של ימים קיצוניים. פחות דרגות חופש פירושן יותר אירועים חריגים.'],
   ['זנב CVaR', 'האחוז מהתוצאות הסופיות הגרועות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הגרועים ביותר.'],
+  ['זנב חיובי', 'האחוז מהתוצאות הסופיות הטובות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הטובים ביותר.'],
   ['זרע אקראי', 'מספר שמאפשר לשחזר בדיוק את אותה סדרת הגרלות ולהשוות שינויים בתנאים.'],
   ['ימי מסחר בשנה', 'מספר הצעדים היומיים בכל שנת סימולציה; משמש להמרת תשואה ותנודתיות שנתיות לערכים יומיים.'],
 ] as const
@@ -227,7 +232,7 @@ function paramsToDrafts(params: SimulationParams) {
     initialInvestment: String(params.initialInvestment), years: String(params.years), paths: String(params.paths),
     annualDrift: String(params.annualDrift * 100), annualVolatility: String(params.annualVolatility * 100),
     leverages: params.leverages.join(', '), degreesOfFreedom: String(params.degreesOfFreedom),
-    cvarPercentile: String(params.cvarPercentile * 100), seed: String(params.seed), tradingDays: String(params.tradingDays),
+    cvarPercentile: String(params.cvarPercentile * 100), positiveTailPercentile: String(params.positiveTailPercentile * 100), seed: String(params.seed), tradingDays: String(params.tradingDays),
   }
 }
 function percent(value: number) { return new Intl.NumberFormat('he-IL', { style: 'percent', maximumFractionDigits: 1 }).format(value) }

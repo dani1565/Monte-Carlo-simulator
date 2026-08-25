@@ -9,6 +9,7 @@ export const DEFAULT_SIMULATION_PARAMS: SimulationParams = {
   annualVolatility: 0.18,
   degreesOfFreedom: 5,
   cvarPercentile: 0.05,
+  positiveTailPercentile: 0.05,
   seed: 2026,
   tradingDays: 252,
 }
@@ -22,6 +23,7 @@ export const PARAMETER_LIMITS = {
   degreesOfFreedom: { min: 2.01, max: 100, step: 0.1 },
   leverage: { min: 0.1, max: 20, step: 0.1 },
   cvarPercentile: { min: 0.01, max: 0.25, step: 0.01 },
+  positiveTailPercentile: { min: 0.01, max: 0.25, step: 0.01 },
   seed: { min: 0, max: 4_294_967_295, step: 1 },
   tradingDays: { min: 1, max: 366, step: 1 },
 } as const

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createHistogram, expectedShortfall, mean, percentile } from './statistics'
+import { createHistogram, expectedShortfall, expectedUpside, mean, percentile } from './statistics'
 
 describe('כלים סטטיסטיים', () => {
   it('מחזיר אפס עבור קלט ריק', () => {
@@ -16,6 +16,11 @@ describe('כלים סטטיסטיים', () => {
 
   it('כולל לפחות ערך אחד בחישוב CVaR', () => {
     expect(expectedShortfall([1, 2, 3], 0.01)).toBe(1)
+  })
+
+  it('מחשב את ממוצע התוצאות הטובות ביותר באחוז שנבחר', () => {
+    expect(expectedUpside([1, 2, 3, 4, 5], 0.4)).toBe(4.5)
+    expect(expectedUpside([1, 2, 3], 0.01)).toBe(3)
   })
 
   it('יוצר היסטוגרמה יציבה גם כאשר כל הערכים זהים', () => {

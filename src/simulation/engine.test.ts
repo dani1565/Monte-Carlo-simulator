@@ -17,6 +17,11 @@ describe('מנוע הסימולציה', () => {
     expect(expectedShortfall(values, 0.4)).toBe(0.5)
   })
 
+  it('מחשב ממוצע של הזנב החיובי לפי אחוז שנבחר', () => {
+    const result = simulate({ ...DEFAULT_SIMULATION_PARAMS, initialInvestment: 100, leverages: [1], years: 1, paths: 100, annualDrift: 0, annualVolatility: 0 })
+    expect(result.results[0].positiveTailAverage).toBe(100)
+  })
+
   it('אינו מוחק תיק רק מפני שירד מתחת לסף מלאכותי', () => {
     const result = simulate({
       ...DEFAULT_SIMULATION_PARAMS,

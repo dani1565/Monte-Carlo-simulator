@@ -1,11 +1,13 @@
 import type { SimulationParams } from '../simulation/types'
+import { DEFAULT_SIMULATION_PARAMS } from '../simulation/defaults'
 import { validateSimulationParams } from '../simulation/validation'
 
 const STORAGE_KEY = 'maslul:simulation-params:v1'
 const PARAMETER_KEYS: (keyof SimulationParams)[] = [
   'initialInvestment', 'leverages', 'years', 'paths', 'annualDrift', 'annualVolatility',
-  'degreesOfFreedom', 'cvarPercentile', 'seed', 'tradingDays',
+  'degreesOfFreedom', 'cvarPercentile', 'positiveTailPercentile', 'seed', 'tradingDays',
 ]
+const REQUIRED_PARAMETER_KEYS = PARAMETER_KEYS.filter((key) => key !== 'positiveTailPercentile')
 
 export function encodeParams(params: SimulationParams): string {
   const query = new URLSearchParams()
@@ -17,6 +19,7 @@ export function encodeParams(params: SimulationParams): string {
   query.set('annualVolatility', String(params.annualVolatility))
   query.set('degreesOfFreedom', String(params.degreesOfFreedom))
   query.set('cvarPercentile', String(params.cvarPercentile))
+  query.set('positiveTailPercentile', String(params.positiveTailPercentile))
   query.set('seed', String(params.seed))
   query.set('tradingDays', String(params.tradingDays))
   return query.toString()
@@ -25,7 +28,7 @@ export function encodeParams(params: SimulationParams): string {
 export function decodeParams(value: string): SimulationParams | null {
   if (!value) return null
   const query = new URLSearchParams(value.startsWith('?') ? value.slice(1) : value)
-  if (PARAMETER_KEYS.some((key) => !query.has(key))) return null
+  if (REQUIRED_PARAMETER_KEYS.some((key) => !query.has(key))) return null
   const params: SimulationParams = {
     initialInvestment: Number(query.get('initialInvestment')),
     leverages: (query.get('leverages') ?? '').split(',').filter(Boolean).map(Number),
@@ -35,6 +38,7 @@ export function decodeParams(value: string): SimulationParams | null {
     annualVolatility: Number(query.get('annualVolatility')),
     degreesOfFreedom: Number(query.get('degreesOfFreedom')),
     cvarPercentile: Number(query.get('cvarPercentile')),
+    positiveTailPercentile: query.has('positiveTailPercentile') ? Number(query.get('positiveTailPercentile')) : DEFAULT_SIMULATION_PARAMS.positiveTailPercentile,
     seed: Number(query.get('seed')),
     tradingDays: Number(query.get('tradingDays')),
   }
@@ -49,9 +53,10 @@ export function loadSavedParams(storage: Storage): SimulationParams | null {
   try {
     const raw = storage.getItem(STORAGE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as SimulationParams
-    if (!parsed || PARAMETER_KEYS.some((key) => !(key in parsed))) return null
-    return Object.keys(validateSimulationParams(parsed)).length ? null : parsed
+    const parsed = JSON.parse(raw) as Partial<SimulationParams>
+    if (!parsed || REQUIRED_PARAMETER_KEYS.some((key) => !(key in parsed))) return null
+    const params = { ...DEFAULT_SIMULATION_PARAMS, ...parsed }
+    return Object.keys(validateSimulationParams(params)).length ? null : params
   } catch {
     return null
   }
