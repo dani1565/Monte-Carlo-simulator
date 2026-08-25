@@ -7,6 +7,12 @@ test.beforeEach(async ({ page }) => {
   }))
 })
 
+test('מזדהה בשם מבחן המינוף', async ({ page }) => {
+  await page.goto('/')
+  await expect(page).toHaveTitle('מבחן המינוף | סימולטור מונטה קרלו')
+  await expect(page.getByRole('heading', { name: 'מבחן המינוף', level: 1 })).toBeVisible()
+})
+
 test('מסביר למשתמש מה הסימולציה עושה ומה משמעות הפרמטרים', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'איך הסימולציה עובדת?' })).toBeVisible()
