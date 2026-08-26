@@ -105,3 +105,4 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - Added a concise in-product explanation of black swans, their potential market impact, and the link between lower Student-t degrees of freedom and more frequent extreme daily moves.
 - TDD evidence: the new desktop/mobile browser test first failed because the preset remained at `5`; after the implementation and production build it passed in both browsers.
 - Follow-up: the glossary now names these events explicitly as “ברבורים שחורים”; the browser test verifies the visible wording.
+- Visibility fix: the same wording is now displayed directly below the `עובי הזנבות` input, without requiring the glossary to be expanded.

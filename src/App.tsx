@@ -127,7 +127,7 @@ export default function App() {
           </fieldset>
           <fieldset className="parameter-section advanced">
             <legend>הגדרות מתקדמות</legend>
-            <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={tailLabel(params.degreesOfFreedom)} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
+            <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={`${tailLabel(params.degreesOfFreedom)}. פחות דרגות חופש פירושן יותר אירועים חריגים (ברבורים שחורים).`} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
             <ParameterField id="cvarPercentile" label="זנב CVaR" description="שיעור התרחישים הגרועים" unit="%" value={drafts.cvarPercentile} min={1} max={25} step={1} range error={validationErrors.cvarPercentile} onChange={(value) => updateNumber('cvarPercentile', value, 100)} />
             <ParameterField id="positiveTailPercentile" label="זנב חיובי" description="שיעור התרחישים הטובים ביותר שממוצעם מוצג" unit="%" value={drafts.positiveTailPercentile} min={1} max={25} step={1} range error={validationErrors.positiveTailPercentile} onChange={(value) => updateNumber('positiveTailPercentile', value, 100)} />
             <ParameterField id="seed" label="זרע אקראי" description="לשחזור אותה סדרת תרחישים" unit="seed" value={drafts.seed} {...PARAMETER_LIMITS.seed} error={validationErrors.seed} onChange={(value) => updateNumber('seed', value)} />
