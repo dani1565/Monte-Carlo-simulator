@@ -1,0 +1,14 @@
+{
+  "source": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=SP500&cosd=2016-08-26&coed=2026-08-24",
+  "series": "SP500",
+  "requestedStart": "2016-08-26",
+  "requestedEnd": "2026-08-24",
+  "firstObservation": "2016-08-26",
+  "lastObservation": "2026-08-24",
+  "observationCount": 2511,
+  "returnCount": 2510,
+  "returnConvention": "simple close-to-close returns between consecutive observed FRED closes",
+  "excessKurtosisEstimator": "bias-corrected Fisher sample excess kurtosis",
+  "excessKurtosis": 15.833504835144865,
+  "fittedStudentTDegreesOfFreedom": 4.378943263823818
+}

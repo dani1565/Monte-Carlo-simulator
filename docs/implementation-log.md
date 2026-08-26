@@ -45,9 +45,9 @@
 - Results now show currency and multiples relative to the initial investment. No URL, localStorage, or E2E work was included in this slice.
 - TDD evidence: validation suite RED on missing modules then GREEN (12 tests); engine behavior RED on amount/day handling then GREEN (6 tests); `ParameterField` RED on missing component then GREEN (3 tests).
 
-## Independent review findings to close
+## Historical independent review findings — resolved in PR #2
 
-An independent fail-closed review ran while the parameter slice was in its RED/in-progress state. These findings are release blockers until a fresh review passes:
+An independent fail-closed review ran while the parameter slice was in its RED/in-progress state. The findings below were blockers at that point; they were resolved before the production-v1 merge and are retained only as historical evidence:
 
 - `initialInvestment` must initialize portfolio values and all returned money values consistently.
 - `tradingDays` must replace the hard-coded 252 in drift, volatility and loop calculations.
@@ -112,3 +112,15 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - TDD evidence: the new desktop/mobile browser test first failed because the preset remained at `5`; after the implementation and production build it passed in both browsers.
 - Follow-up: the glossary now names these events explicitly as “ברבורים שחורים”; the browser test verifies the visible wording.
 - Visibility fix: the same wording is now displayed directly below the `עובי הזנבות` input, without requiring the glossary to be expanded.
+
+## 2026-08-26 — Codex project handoff foundation
+
+- Established GitHub as the durable source of truth for product, model, sources, decisions, operations, and current status.
+- Added accepted ADRs for the natural zero floor, editable inputs, browser-only worker architecture, black-swan stress preset, positive-tail metric, and privacy-first analytics.
+- Added a reproducible FRED calibration script plus deterministic unit tests for CSV parsing, simple returns, sample excess kurtosis, and Student-t fitting.
+- Added GitHub Issue and PR templates with acceptance criteria and owner-approval classification.
+- Added Codex bootstrap and routine-task prompts; private profile details and raw session identifiers remain outside the public repository.
+- TDD evidence: the tail-calibration test first failed because the module did not exist, then the parsing/return/kurtosis tests failed because their functions were missing; all passed after the minimal implementations.
+- Release evidence: `npm run check:release` passed with 45 unit/component tests and 18 desktop/mobile Playwright tests; the production artifact commit marker matched Git HEAD; the dated FRED reproduction returned excess kurtosis `15.833504835144865` and fitted `df = 4.378943263823818`.
+- Codex read-only audit found and triggered fixes for CVaR wording, compatibility and approval ambiguity, missing methodological provenance, ADR evidence links, a committed calibration result, and deterministic commit-aware live-site verification.
+- Pre-marker live evidence confirmed HTTP 200, the expected product title, and non-empty production JavaScript/CSS assets; the commit-aware live gate is verified after deployment.

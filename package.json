@@ -12,8 +12,11 @@
     "test:e2e": "playwright test",
     "check:terms": "node scripts/check-terms.mjs",
     "check:fast": "npm run lint && npm test && npm run typecheck",
-    "check:full": "npm run check:terms && npm run lint && npm test && npm run build",
+    "check:full": "npm run check:terms && npm run lint && npm test && npm run build && npm run check:build-meta",
     "check:release": "npm run check:full && npm run test:e2e",
+    "check:build-meta": "node --experimental-strip-types scripts/check-build-meta.mts",
+    "calibrate:sp500-tail": "node --experimental-strip-types scripts/calibrate-sp500-tail.mts",
+    "verify:live": "node --experimental-strip-types scripts/verify-live-site.mts",
     "preview": "vite preview"
   },
   "dependencies": {

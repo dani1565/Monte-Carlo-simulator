@@ -1,0 +1,45 @@
+name: שינוי או פיצ'ר
+description: בקשה מוגדרת עם קריטריוני קבלה וסיווג אישור
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: הבעיה הנראית למשתמש
+      description: מה חסר או אינו ברור היום?
+    validations:
+      required: true
+  - type: textarea
+    id: desired
+    attributes:
+      label: ההתנהגות הרצויה
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: קריטריוני קבלה
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: בתוך התחום / מחוץ לתחום
+  - type: dropdown
+    id: material-impact
+    attributes:
+      label: האם יש השפעת מודל, פרטיות, משפט או תשתית?
+      options:
+        - לא
+        - כן — נדרש אישור בעלים
+        - לא ידוע — יש לברר לפני מימוש
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: בדיקות נדרשות
+  - type: textarea
+    id: docs
+    attributes:
+      label: מסמכים או ADRs רלוונטיים
