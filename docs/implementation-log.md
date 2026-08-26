@@ -86,6 +86,12 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - TDD evidence: the targeted desktop E2E test failed before the beacon/disclosure existed, then passed after implementation.
 - Scope is page-level traffic and performance analytics only; no simulation parameters, financial inputs, custom events, accounts, or personal profiles are collected by application code.
 
+## 2026-08-26 — Prominent calculation status
+
+- The upper-left calculation-status icon now becomes visibly red, with a red-tinted pill, while the simulation is running ("מחשב · x%").
+- When the Web Worker completes, it returns to the existing green ready state ("המודל מוכן").
+- TDD evidence: targeted desktop browser test was observed failing because the running-status class was absent; implementation added it and the red styling.
+
 ## 2026-08-26 — Brand rename
 
 - Renamed the public product name from "מסלול" to "מבחן המינוף" in the in-app heading, browser title, and README.

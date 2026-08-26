@@ -68,6 +68,19 @@ test('טוען מדידת שימוש מצרפית ומציג גילוי פרטי
   await expect(page.getByText(/נתוני שימוש מצרפיים.*Cloudflare Web Analytics.*ללא עוגיות/)).toBeVisible()
 })
 
+test('סמל מצב החישוב בולט באדום וחוזר למצבו המוכן', async ({ page }) => {
+  await page.goto('/?paths=100000&years=50')
+
+  const status = page.locator('.status-pill')
+  await expect(status).toContainText(/מחשב · \d+%/)
+  await expect(status).toHaveClass(/status-pill--running/)
+  await expect(status.locator('span')).toHaveCSS('background-color', 'rgb(255, 107, 114)')
+
+  await expect(status).toHaveText('המודל מוכן', { timeout: 30_000 })
+  await expect(status).not.toHaveClass(/status-pill--running/)
+  await expect(status.locator('span')).toHaveCSS('background-color', 'rgb(81, 229, 180)')
+})
+
 test('טוען סימולציה, משנה פרמטר ושומר אותו', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
