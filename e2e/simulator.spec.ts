@@ -37,12 +37,11 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
 test('תרחיש S&P היסטורי מכוון לזנבות לחץ ומסביר ברבורים שחורים', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'S&P היסטורי' }).click()
-  await page.getByRole('group', { name: 'מה אומר כל פרמטר?' }).getByText('מה אומר כל פרמטר?', { exact: true }).click()
 
   await expect(page.getByRole('spinbutton', { name: 'עובי הזנבות' })).toHaveValue('4.2')
   await expect(page.getByText(/ברבור שחור הוא אירוע נדיר וקיצוני בשוק ההון/)).toBeVisible()
   await expect(page.getByText(/פרמטר "עובי הזנבות" קובע כמה משקל המודל נותן לימים כאלה/)).toBeVisible()
-  await expect(page.getByText(/פחות דרגות חופש פירושן יותר אירועים חריגים \(ברבורים שחורים\)/)).toBeVisible()
+  await expect(page.locator('#degreesOfFreedom-description')).toHaveText(/פחות דרגות חופש פירושן יותר אירועים חריגים \(ברבורים שחורים\)/)
 })
 
 test('מציג הבהרה משפטית ברורה ונגישה', async ({ page }) => {
