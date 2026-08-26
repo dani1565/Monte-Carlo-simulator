@@ -34,6 +34,15 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
 })
 
+test('תרחיש S&P היסטורי מכוון לזנבות לחץ ומסביר ברבורים שחורים', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'S&P היסטורי' }).click()
+
+  await expect(page.getByRole('spinbutton', { name: 'עובי הזנבות' })).toHaveValue('4.2')
+  await expect(page.getByText(/ברבור שחור הוא אירוע נדיר וקיצוני בשוק ההון/)).toBeVisible()
+  await expect(page.getByText(/פרמטר "עובי הזנבות" קובע כמה משקל המודל נותן לימים כאלה/)).toBeVisible()
+})
+
 test('מציג הבהרה משפטית ברורה ונגישה', async ({ page }) => {
   await page.goto('/')
   const disclaimer = page.getByRole('note', { name: 'הבהרה משפטית' })

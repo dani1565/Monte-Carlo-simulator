@@ -98,3 +98,9 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - The simulator now calculates the average final value among the selected X% best paths and shows it beside CVaR as “ממוצע זנב חיובי”.
 - Added Hebrew descriptions in the control, parameter glossary, and mathematical-model documentation; URL sharing and local persistence include the new parameter.
 - TDD evidence: targeted statistics, engine, validation, storage, and browser tests were first observed failing, then passed after implementation.
+
+## 2026-08-26 — Black-swan stress calibration
+
+- Updated the `S&P היסטורי` preset to use tail degrees of freedom `4.2`, an intentionally stress-oriented setting for examining leveraged-fund fragility rather than a neutral normal-market assumption.
+- Added a concise in-product explanation of black swans, their potential market impact, and the link between lower Student-t degrees of freedom and more frequent extreme daily moves.
+- TDD evidence: the new desktop/mobile browser test first failed because the preset remained at `5`; after the implementation and production build it passed in both browsers.
