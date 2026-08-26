@@ -1,0 +1,40 @@
+name: דיווח באג
+description: תקלה ניתנת לשחזור עם התנהגות צפויה
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: מה קרה בפועל?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: מה היה צריך לקרות?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: צעדי שחזור
+      placeholder: "1. ...\n2. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: דפדפן, מכשיר וקישור תרחיש
+  - type: dropdown
+    id: material-impact
+    attributes:
+      label: האם התיקון עלול לשנות מודל, פרטיות, משפט או תשתית?
+      options:
+        - לא
+        - כן — נדרש אישור בעלים
+        - לא ידוע
+    validations:
+      required: true
+  - type: textarea
+    id: regression
+    attributes:
+      label: בדיקת regression נדרשת
