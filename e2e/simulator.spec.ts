@@ -235,7 +235,8 @@ test('מציג חריגה מתקרת החישוב כחסם תחתון בלי ל�
   })}`)
 
   const warning = page.getByRole('alert', { name: 'חריגה מתקרת החישוב' })
-  await expect(warning).toContainText('התוצאה חורגת מתקרת החישוב של 10¹⁵ ₪')
+  await expect(warning.locator('strong')).toHaveText('חלק ממסלולי הסימולציה חצו את רף החישוב העליון — 10¹⁵ ₪')
+  await expect(warning.locator('p')).toHaveText('לכן תוצאות השווי ברמות המינוף המסומנות אינן מלאות: הערכים בפועל עשויים להיות גבוהים יותר, והם מוצגים כחסם תחתון (≥). שיעור המחיקה אינו מושפע.')
   await expect(warning).toContainText('מינוף 20×: 100 מתוך 100 מסלולים (100%)')
 
   const unaffectedCard = page.locator('.metric-card').filter({ hasText: '1×' })
