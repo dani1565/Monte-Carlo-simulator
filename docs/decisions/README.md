@@ -10,5 +10,6 @@ ADRs משמרים החלטות מהותיות והנימוקים שלהן. מס�
 - [0006 — analytics מצרפי וממוקד פרטיות](0006-privacy-first-aggregate-analytics.md)
 - [0007 — רצפת ‎-100% לתשואת מדד פשוטה](0007-bounded-simple-index-return.md)
 - [0008 — חשיפת תקרת החישוב כחסם תחתון](0008-explicit-portfolio-value-limit.md)
+- [0009 — המרת תשואה שנתית לרכיב יומי מצטבר](0009-compound-annual-drift.md)
 
 כל ADR חדש כולל: מצב, תאריך, הקשר, החלטה, חלופות, השלכות, דרישת אישור וקישורי PR/בדיקות.

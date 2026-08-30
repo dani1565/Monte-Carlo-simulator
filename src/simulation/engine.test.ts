@@ -39,10 +39,43 @@ describe('מנוע הסימולציה', () => {
     expect(result.results[0].annualizedMedian).toBe(0)
   })
 
-  it('משתמש במספר ימי המסחר שהוגדר', () => {
-    const params = { ...DEFAULT_SIMULATION_PARAMS, initialInvestment: 1, leverages: [1], years: 1, paths: 1, annualDrift: 0.12, annualVolatility: 0 }
-    expect(simulate({ ...params, tradingDays: 1 }).results[0].median).toBeCloseTo(1.12)
-    expect(simulate({ ...params, tradingDays: 2 }).results[0].median).toBeCloseTo(1.1236)
+  it('ממיר תשואה שנתית לרכיב יומי שנצבר בדיוק לתשואה השנתית שהוגדרה', () => {
+    const params = { ...DEFAULT_SIMULATION_PARAMS, initialInvestment: 100, leverages: [1], years: 1, paths: 1, annualDrift: 0.12, annualVolatility: 0 }
+    expect(simulate({ ...params, tradingDays: 1 }).results[0].median).toBeCloseTo(112)
+    expect(simulate({ ...params, tradingDays: 2 }).results[0].median).toBeCloseTo(112)
+    expect(simulate({ ...params, tradingDays: 252 }).results[0].median).toBeCloseTo(112)
+  })
+
+  it('צובר את רכיב התשואה השנתי בדיוק גם בתשואה שלילית ולאורך מספר שנים', () => {
+    const result = simulate({
+      ...DEFAULT_SIMULATION_PARAMS,
+      initialInvestment: 100,
+      leverages: [1],
+      years: 3,
+      paths: 1,
+      annualDrift: -0.2,
+      annualVolatility: 0,
+      tradingDays: 252,
+    })
+
+    expect(result.results[0].median).toBeCloseTo(100 * 0.8 ** 3)
+    expect(result.results[0].annualizedMedian).toBeCloseTo(-0.2)
+  })
+
+  it('מתייחס לתשואה שנתית של ‎-100% כגבול של אובדן מלא', () => {
+    const result = simulate({
+      ...DEFAULT_SIMULATION_PARAMS,
+      initialInvestment: 100,
+      leverages: [1],
+      years: 1,
+      paths: 1,
+      annualDrift: -1,
+      annualVolatility: 0,
+      tradingDays: 252,
+    })
+
+    expect(result.results[0].median).toBe(0)
+    expect(result.results[0].wipeoutRate).toBe(1)
   })
 
   it('משאיר תיק שנמחק באופן טבעי באפס', () => {
@@ -56,14 +89,15 @@ describe('מנוע הסימולציה', () => {
   })
 
   it('חוסם תשואת מדד יומית ב־‎-100% לפני החלת המינוף', () => {
+    const studentT = vi.spyOn(SeededRandom.prototype, 'studentT').mockReturnValue(-10)
     const result = simulate({
       ...DEFAULT_SIMULATION_PARAMS,
       initialInvestment: 100,
       leverages: [0.5, 1, 2],
       years: 1,
-      paths: 100,
-      annualDrift: -2,
-      annualVolatility: 0,
+      paths: 1,
+      annualDrift: 0,
+      annualVolatility: 1,
       tradingDays: 1,
     })
 
@@ -73,6 +107,7 @@ describe('מנוע הסימולציה', () => {
     expect(result.results[1].wipeoutRate).toBe(1)
     expect(result.results[2].median).toBe(0)
     expect(result.results[2].wipeoutRate).toBe(1)
+    studentT.mockRestore()
   })
 
   it('צורך הגרלת Student-t אחת לכל מסלול ויום גם כאשר התשואה נחסמת', () => {
