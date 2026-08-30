@@ -6,19 +6,24 @@ export interface ParameterFieldProps {
   value: string
   min: number
   max: number
+  rangeMax?: number
   step: number
   error?: string
+  advisory?: string
   range?: boolean
   inputType?: 'number' | 'text'
   onChange: (value: string) => void
 }
 
-export function ParameterField({ id, label, description, unit, value, min, max, step, error, range, inputType = 'number', onChange }: ParameterFieldProps) {
+export function ParameterField({ id, label, description, unit, value, min, max, rangeMax, step, error, advisory, range, inputType = 'number', onChange }: ParameterFieldProps) {
   const descriptionId = `${id}-description`
   const errorId = `${id}-error`
-  const describedBy = error ? `${descriptionId} ${errorId}` : descriptionId
+  const advisoryId = `${id}-advisory`
+  const describedBy = [descriptionId, advisory ? advisoryId : '', error ? errorId : ''].filter(Boolean).join(' ')
   const numericValue = Number(value)
-  const fill = Number.isFinite(numericValue) ? Math.max(0, Math.min(100, ((numericValue - min) / (max - min)) * 100)) : 0
+  const sliderMax = rangeMax ?? max
+  const sliderValue = Number.isFinite(numericValue) ? Math.max(min, Math.min(sliderMax, numericValue)) : min
+  const fill = ((sliderValue - min) / (sliderMax - min)) * 100
 
   return (
     <div className={`parameter-field ${error ? 'invalid' : ''}`}>
@@ -31,9 +36,10 @@ export function ParameterField({ id, label, description, unit, value, min, max, 
         <span>{unit}</span>
       </div>
       {range && <>
-        <input className="range" aria-label={`${label} — מחוון`} type="range" min={min} max={max} step={step} value={Number.isFinite(numericValue) ? Math.max(min, Math.min(max, numericValue)) : min} style={{ '--fill': `${fill}%` } as React.CSSProperties} onChange={(event) => onChange(event.target.value)} />
-        <div className="range-ends"><span>{min}</span><span>{max}</span></div>
+        <input className="range" aria-label={`${label} — מחוון`} aria-describedby={describedBy} type="range" min={min} max={sliderMax} step={step} value={sliderValue} style={{ '--fill': `${fill}%` } as React.CSSProperties} onChange={(event) => onChange(event.target.value)} />
+        <div className="range-ends"><span>{min}</span><span>{sliderMax}</span></div>
       </>}
+      {advisory && <p id={advisoryId} className="field-advisory">{advisory}</p>}
       {error && <p id={errorId} className="field-error" role="alert">{error}</p>}
     </div>
   )

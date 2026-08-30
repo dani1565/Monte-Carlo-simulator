@@ -7,6 +7,15 @@ test.beforeEach(async ({ page }) => {
   }))
 })
 
+function sharedScenario(overrides: Record<string, string> = {}) {
+  return new URLSearchParams({
+    initialInvestment: '100000', leverages: '1,2,3', years: '20', paths: '2000',
+    annualDrift: '0.09', annualVolatility: '0.18', degreesOfFreedom: '5',
+    cvarPercentile: '0.05', positiveTailPercentile: '0.05', seed: '2026', tradingDays: '252',
+    ...overrides,
+  })
+}
+
 test('מזדהה בשם מבחן המינוף', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle('מבחן המינוף | סימולטור מונטה קרלו')
@@ -69,7 +78,7 @@ test('טוען מדידת שימוש מצרפית ומציג גילוי פרטי
 })
 
 test('סמל מצב החישוב בולט באדום וחוזר למצבו המוכן', async ({ page }) => {
-  await page.goto('/?paths=100000&years=50')
+  await page.goto(`/?${sharedScenario({ paths: '10000', years: '10', tradingDays: '10' })}`)
 
   const status = page.locator('.status-pill')
   await expect(status).toContainText(/מחשב · \d+%/)
@@ -81,6 +90,18 @@ test('סמל מצב החישוב בולט באדום וחוזר למצבו המ�
   await expect(status.locator('span')).toHaveCSS('background-color', 'rgb(81, 229, 180)')
 })
 
+test('קישור משותף עם מאה אלף מסלולים נשאר חוקי ומצמיד את המחוון לתקרה הרכה', async ({ page }) => {
+  await page.goto(`/?${sharedScenario({ paths: '100000', years: '1', tradingDays: '1' })}`)
+
+  const paths = page.getByRole('spinbutton', { name: 'מספר מסלולים' })
+  const pathsSlider = page.getByRole('slider', { name: 'מספר מסלולים — מחוון' })
+  await expect(paths).toHaveValue('100000')
+  await expect(paths).toHaveAttribute('max', '100000')
+  await expect(pathsSlider).toHaveAttribute('max', '10000')
+  await expect(pathsSlider).toHaveValue('10000')
+  await expect(page.locator('#paths-advisory')).toHaveText('מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב.')
+})
+
 test('טוען סימולציה, משנה פרמטר ושומר אותו', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
@@ -88,9 +109,13 @@ test('טוען סימולציה, משנה פרמטר ושומר אותו', async
 
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'מה קרה לכסף?' })).toBeVisible()
+
+  await page.getByRole('spinbutton', { name: 'מספר מסלולים' }).fill('100')
+  await page.getByRole('spinbutton', { name: 'ימי מסחר בשנה' }).fill('1')
+  const years = page.getByRole('spinbutton', { name: 'טווח השקעה' })
+  await years.fill('1')
   await expect(page.getByText('שווי חציוני').first()).toBeVisible({ timeout: 20_000 })
 
-  const years = page.getByRole('spinbutton', { name: 'טווח השקעה' })
   await years.fill('3')
   await expect(page.getByText(/מסלולים · 3 שנים/)).toBeVisible({ timeout: 20_000 })
   await page.reload()
@@ -99,10 +124,20 @@ test('טוען סימולציה, משנה פרמטר ושומר אותו', async
 })
 
 test('קלט לא תקין חוסם הרצה ומציג הודעה', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('spinbutton', { name: 'מספר מסלולים' }).fill('0')
+  await page.goto(`/?${sharedScenario({ paths: '100', years: '1', tradingDays: '1' })}`)
+  await page.getByRole('spinbutton', { name: 'מספר מסלולים' }).fill('100001')
+  await expect(page.getByText('מספר המסלולים חייב להיות מספר שלם בין 100 ל־100,000')).toBeVisible()
+  await expect(page.locator('#paths-advisory')).toHaveCount(0)
   await expect(page.getByText('יש לתקן את הערכים המסומנים לפני הרצת הסימולציה.')).toBeVisible()
   await expect(page.getByRole('button', { name: /הרץ סימולציה/ })).toBeDisabled()
+})
+
+test('עשרת אלפים מסלולים נשארים בתחום המחוון בלי אזהרת עומס', async ({ page }) => {
+  await page.goto(`/?${sharedScenario({ paths: '10000', years: '1', tradingDays: '1' })}`)
+  await expect(page.getByRole('spinbutton', { name: 'מספר מסלולים' })).toHaveValue('10000')
+  await expect(page.getByRole('slider', { name: 'מספר מסלולים — מחוון' })).toHaveValue('10000')
+  await expect(page.locator('#paths-description')).toHaveText('דגימות אקראיות · חישוב בינוני')
+  await expect(page.locator('#paths-advisory')).toHaveCount(0)
 })
 
 test('פרמטרים מלאים נטענים מקישור משותף', async ({ page }) => {
