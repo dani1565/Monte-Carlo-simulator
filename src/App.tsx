@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DistributionChart, PathChart } from './components/Charts'
 import { leverageColor } from './components/chartMath'
 import { ParameterField } from './components/ParameterField'
+import { SimulationTour } from './components/SimulationTour'
 import { presets } from './presets'
 import { DEFAULT_SIMULATION_PARAMS, PARAMETER_LIMITS } from './simulation/defaults'
 import type { SimulationParams, SimulationResult } from './simulation/types'
@@ -106,12 +107,13 @@ export default function App() {
 
       <section className="hero">
         <div><p className="eyebrow">סימולטור מונטה קרלו ממונף</p><h2>הממוצע מבטיח.<br /><em>המציאות מתפלגת.</em></h2></div>
-        <p className="hero-copy">בדקו אלפי מסלולי שוק עם זנבות שמנים, מינוף יומי ואפשרות למחיקה מלאה. כי אף משקיע לא חי בתוך הממוצע.</p>
+        <p className="hero-copy">השוו השקעה רגילה לרמות שונות של מינוף יומי על אותם מסלולי שוק סינתטיים — ובדקו כיצד תנודתיות ואירועי קצה משנים את התוצאה לאורך זמן.</p>
       </section>
 
-      <SimulationIntroduction />
+      <SimulationTour />
+      <ParameterGlossary />
 
-      <section className="preset-strip" aria-label="תרחישים מוכנים">
+      <section id="presets" className="preset-strip" aria-label="תרחישים מוכנים">
         {presets.map((preset) => <button key={preset.name} onClick={() => replaceParams({ ...params, ...preset.values })}><strong>{preset.name}</strong><span>{preset.description}</span></button>)}
       </section>
 
@@ -223,22 +225,8 @@ const PARAMETER_HELP = {
   },
 } as const
 
-function SimulationIntroduction() {
-  return <section className="simulation-intro" aria-labelledby="simulation-intro-title">
-    <div className="intro-heading"><p className="eyebrow">לפני שמתחילים</p><h2 id="simulation-intro-title">איך הסימולציה עובדת?</h2><p>הכלי יוצר אלפי <strong>מסלולי מדד סינתטיים</strong>: בכל יום מסחר הוא מגריל תשואה אקראית לפי ההנחות שבחרתם, מחיל עליה כל רמת מינוף, וחוזר על התהליך עד סוף תקופת ההשקעה.</p><p>לאחר כל ההרצות הוא מסכם את טווח התוצאות — חציון, ממוצע, סיכון למחיקה מלאה ו־CVaR — כדי להראות לא רק מה עשוי לקרות בממוצע, אלא גם מה קורה בתרחישים קשים.</p></div>
-    <ol className="simulation-steps" aria-label="שלבי הסימולציה" role="list">
-      <li><span>1</span><div><strong>בוחרים הנחות</strong><p>סכום, שנים, תשואה, תנודתיות, מינוף ושאר הפרמטרים.</p></div></li>
-      <li><span>2</span><div><strong>מגרילים אלפי מסלולים</strong><p>כל מסלול הוא עתיד אפשרי ועצמאי של תשואות מדד יומיות.</p></div></li>
-      <li><span>3</span><div><strong>משווים את התוצאות</strong><p>בודקים תוצאה טיפוסית, פיזור, תרחישי קצה ומחיקה מלאה.</p></div></li>
-    </ol>
-    <aside className="history-comparison" aria-labelledby="history-comparison-title">
-      <h3 id="history-comparison-title">למה לא להסתפק בהרצה היסטורית?</h3>
-      <p>ההיסטוריה מראה לנו רק מסלול אחד שהתממש מתוך מסלולים רבים שהיו יכולים להתממש. בדיקה היסטורית (Backtest) מספרת מה קרה בתקופה מסוימת; סימולציית מונטה קרלו מרחיבה את המבט ובודקת אלפי עתידים אפשריים תחת אותן הנחות.</p>
-      <p>לחשיבה על העתיד זה מועיל במיוחד, משום שתשואות העבר אינן מבטיחות את תשואות העתיד ואינן לבדן בסיס אמין לחיזוי שלהן. הרעיון קשור לאזהרה שבספר <cite>“הברבור השחור”</cite> של נאסים ניקולס טאלב מפני הסתמכות־יתר על מה שכבר נצפה ועל סיפורים שנראים ברורים רק בדיעבד.</p>
-      <p><strong>מהו ברבור שחור?</strong> ברבור שחור הוא אירוע נדיר וקיצוני בשוק ההון — למשל נפילה חדה או פער פתיחה — שעלול לגרום הפסד חריג. פרמטר "עובי הזנבות" קובע כמה משקל המודל נותן לימים כאלה: פחות דרגות חופש מגדילות את הסיכוי לתנועות קצה, ולכן בודקות טוב יותר את פגיעות המינוף.</p>
-      <p><strong>אבל זו לא מכונת נבואה:</strong> גם סימולציה מוגבלת להנחות שהוזנו. היא מרחיבה את מגוון האפשרויות ביחס למסלול היסטורי יחיד, אך אינה יכולה להבטיח שתכלול אירוע קיצוני שהמודל לא מייצג.</p>
-    </aside>
-    <p className="model-warning"><strong>חשוב:</strong> זו סימולציה הסתברותית המבוססת על הנחות. היא אינה שחזור של ההיסטוריה, אינה משתמשת בנתוני שוק חיים ואינה תחזית או ייעוץ השקעות.</p>
+function ParameterGlossary() {
+  return <section className="parameter-reference" aria-label="מילון פרמטרים">
     <details className="parameter-glossary" aria-label="מה אומר כל פרמטר?">
       <summary>מה אומר כל פרמטר?</summary>
       <div className="glossary-grid">{Object.values(PARAMETER_HELP).map(({ glossaryLabel, details }) => <article key={glossaryLabel}><h3>{glossaryLabel}</h3><p>{details}</p></article>)}</div>

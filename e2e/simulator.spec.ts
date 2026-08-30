@@ -24,10 +24,39 @@ test('מזדהה בשם מבחן המינוף', async ({ page }) => {
 
 test('מסביר למשתמש מה הסימולציה עושה ומה משמעות הפרמטרים', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'איך הסימולציה עובדת?' })).toBeVisible()
-  await expect(page.getByText(/מסלולי מדד סינתטיים/)).toBeVisible()
-  await expect(page.getByText(/אינה שחזור של ההיסטוריה/)).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'למה לא להסתפק בהרצה היסטורית?' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'הכירו את הסימולטור בחמישה צעדים' })).toBeVisible()
+  const activeStep = page.locator('.tour-step')
+  await expect(activeStep).toHaveAttribute('aria-live', 'polite')
+  await expect(activeStep).toContainText('מודל מפושט של קרן ממונפת יומית')
+  await expect(activeStep).toContainText('אינו מדמה הלוואה, מרג׳ין או דרישות ביטחונות')
+  await expect(activeStep).toContainText('100 ← 110 ← 99')
+  await expect(activeStep).toContainText('100 ← 130 ← 91')
+  await expect(page.getByRole('button', { name: 'הקודם' })).toBeDisabled()
+  await expect(page.getByRole('link', { name: 'דלגו לתרחישים' })).toHaveAttribute('href', '#presets')
+
+  const next = page.getByRole('button', { name: 'הבא' })
+  await next.click()
+  await expect(activeStep).toContainText('מסלולי שוק סינתטיים')
+  await expect(activeStep).toContainText('אותם מסלולי שוק')
+
+  await next.click()
+  await expect(activeStep).toContainText('Backtest בוחן מסלול היסטורי יחיד')
+  await expect(activeStep).toContainText('אינו טוב יותר לכל מטרה')
+  await expect(activeStep).toContainText('משלים בדיקה היסטורית')
+
+  await next.click()
+  await expect(activeStep).toContainText('ברבור שחור הוא אירוע שוק נדיר וקיצוני')
+  await expect(activeStep).toContainText('df נמוך יותר')
+  await expect(activeStep).toContainText('אינו חוזה אירוע מסוים')
+
+  await next.click()
+  await expect(activeStep).toContainText('חציון מול ממוצע')
+  await expect(activeStep).toContainText('עלות מימון, margin call')
+  await expect(page.getByRole('link', { name: 'לתרחישים המוכנים' })).toHaveAttribute('href', '#presets')
+
+  const deepDive = page.getByText('להעמקה: היסטוריה, טאלב וברבורים שחורים', { exact: true })
+  await deepDive.focus()
+  await page.keyboard.press('Enter')
   await expect(page.getByText(/ההיסטוריה מראה לנו רק מסלול אחד/)).toBeVisible()
   await expect(page.getByText(/הברבור השחור.*נאסים ניקולס טאלב/)).toBeVisible()
   await expect(page.getByText(/גם סימולציה מוגבלת להנחות/)).toBeVisible()
@@ -56,9 +85,22 @@ test('תרחיש S&P היסטורי מכוון לזנבות לחץ ומסביר 
   await page.getByRole('button', { name: 'S&P היסטורי' }).click()
 
   await expect(page.getByRole('spinbutton', { name: 'עובי הזנבות' })).toHaveValue('4.2')
-  await expect(page.getByText(/ברבור שחור הוא אירוע נדיר וקיצוני בשוק ההון/)).toBeVisible()
-  await expect(page.getByText(/פרמטר "עובי הזנבות" קובע כמה משקל המודל נותן לימים כאלה/)).toBeVisible()
+  await page.getByRole('button', { name: 'הבא' }).click()
+  await page.getByRole('button', { name: 'הבא' }).click()
+  await page.getByRole('button', { name: 'הבא' }).click()
+  await expect(page.locator('.tour-step')).toContainText(/ברבור שחור הוא אירוע שוק נדיר וקיצוני/)
+  await expect(page.locator('.tour-step')).toContainText(/פרמטר „עובי הזנבות” קובע כמה משקל המודל נותן לימים כאלה/)
   await expect(page.locator('#degreesOfFreedom-description')).toHaveText(/פחות דרגות חופש פירושן יותר אירועים חריגים \(ברבורים שחורים\)/)
+})
+
+test('הסיור נשאר קומפקטי וללא גלילה אופקית במובייל', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+
+  await expect(page.getByRole('heading', { name: 'איזה מינוף נבדק?' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'במה זה שונה מ־Backtest?' })).toHaveCount(0)
+  await expect(page.locator('.tour-step')).toHaveCount(1)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
 })
 
 test('מציג הבהרה משפטית ברורה ונגישה', async ({ page }) => {
