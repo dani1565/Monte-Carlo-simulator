@@ -8,9 +8,10 @@
 - ענף ברירת מחדל: `main`
 - אתר: https://dani1565.github.io/Monte-Carlo-simulator/
 - baseline לפני חבילת ההעברה לקודקס: `78ba11b`
-- ריצת איכות baseline: https://github.com/dani1565/Monte-Carlo-simulator/actions/runs/32965351964
-- ריצת Pages baseline: https://github.com/dani1565/Monte-Carlo-simulator/actions/runs/32965351960
-- חבילת ההעברה המקומית אומתה באמצעות `npm run check:release`; המספרים המעודכנים רשומים ביומן המימוש. לפני הוספת סמן ה־commit, בדיקת האתר אישרה HTTP 200, כותרת ו־assets. האימות הסופי לאחר המיזוג ידרוש גם התאמה מדויקת בין `main` לבין `build-commit` שבאתר.
+- שחרור מאומת אחרון: `de6cdbf` — סיור מודרך למבחן המינוף.
+- ריצת איכות ב־`main`: https://github.com/dani1565/Monte-Carlo-simulator/actions/runs/33314146122
+- ריצת Pages: https://github.com/dani1565/Monte-Carlo-simulator/actions/runs/33314146108
+- האתר החי אומת באמצעות `npm run verify:live`: ‏HTTP 200, כותרת ו־assets תקינים, ו־`build-commit` תואם בדיוק ל־`de6cdbf`.
 
 ## שערים
 
@@ -31,7 +32,5 @@
 ## עבודה פתוחה
 
 GitHub Issues הוא התור הקנוני: https://github.com/dani1565/Monte-Carlo-simulator/issues
-
-- Issue #18 מוסיף סיור פתיחה מודרך וממתין להצגת Preview ולאישור בעלים לפני מיזוג.
 
 אין לשמור backlog רק בקובץ זה. כל משימה חדשה נפתחת כ־Issue עם קריטריוני קבלה וסיווג אישור בעלים.
