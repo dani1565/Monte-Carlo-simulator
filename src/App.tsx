@@ -60,7 +60,10 @@ export default function App() {
   }, [params.leverages, selectedLeverage])
 
   const selectedResult = result?.results.find((item) => item.leverage === selectedLeverage) ?? result?.results[0]
-  const computeLabel = params.paths <= 5_000 ? 'חישוב קל' : params.paths <= 20_000 ? 'חישוב בינוני' : 'חישוב כבד'
+  const computeLabel = params.paths <= 5_000 ? 'חישוב קל' : params.paths <= 10_000 ? 'חישוב בינוני' : 'חישוב כבד'
+  const pathsAdvisory = !validationErrors.paths && params.paths > 10_000
+    ? 'מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב.'
+    : undefined
   const insight = useMemo(() => {
     if (!selectedResult) return ''
     const gap = selectedResult.median > 0 ? selectedResult.mean / selectedResult.median : Infinity
@@ -120,7 +123,7 @@ export default function App() {
             <legend>הגדרות בסיסיות</legend>
             <ParameterField id="initialInvestment" label="סכום התחלתי" description="שווי התיק בתחילת הדרך" unit="₪" value={drafts.initialInvestment} {...PARAMETER_LIMITS.initialInvestment} error={validationErrors.initialInvestment} onChange={(value) => updateNumber('initialInvestment', value)} />
             <ParameterField id="years" label="טווח השקעה" description="משך הסימולציה" unit="שנים" value={drafts.years} {...PARAMETER_LIMITS.years} range error={validationErrors.years} onChange={(value) => updateNumber('years', value)} />
-            <ParameterField id="paths" label="מספר מסלולים" description={`דגימות אקראיות · ${computeLabel}`} unit="מסלולים" value={drafts.paths} {...PARAMETER_LIMITS.paths} range error={validationErrors.paths} onChange={(value) => updateNumber('paths', value)} />
+            <ParameterField id="paths" label="מספר מסלולים" description={`דגימות אקראיות · ${computeLabel}`} unit="מסלולים" value={drafts.paths} {...PARAMETER_LIMITS.paths} rangeMax={10_000} range advisory={pathsAdvisory} error={validationErrors.paths} onChange={(value) => updateNumber('paths', value)} />
             <ParameterField id="annualDrift" label="תשואה שנתית צפויה" description="קצב שנתי לחישוב רכיב התשואה היומי" unit="%" value={drafts.annualDrift} min={-100} max={100} step={0.1} range error={validationErrors.annualDrift} onChange={(value) => updateNumber('annualDrift', value, 100)} />
             <ParameterField id="annualVolatility" label="תנודתיות שנתית" description="סטיית התקן השנתית" unit="%" value={drafts.annualVolatility} min={0} max={200} step={0.1} range error={validationErrors.annualVolatility} onChange={(value) => updateNumber('annualVolatility', value, 100)} />
             <ParameterField id="leverages" label="רמות מינוף להשוואה" description="הפרידו ערכים בפסיקים, למשל 1, 2.5, 4" unit="×" inputType="text" value={drafts.leverages} min={PARAMETER_LIMITS.leverage.min} max={PARAMETER_LIMITS.leverage.max} step={PARAMETER_LIMITS.leverage.step} error={validationErrors.leverages} onChange={updateLeverages} />
@@ -176,7 +179,7 @@ export default function App() {
 const parameterExplanations = [
   ['סכום התחלתי', 'הסכום שממנו מתחיל כל מסלול. התוצאות מוצגות גם בשקלים וגם כמכפיל של סכום זה.'],
   ['טווח השקעה', 'מספר השנים שכל מסלול מדמה. אופק ארוך יוצר יותר ימי מסחר ויותר אפשרויות לתוצאות שונות.'],
-  ['מספר מסלולים', 'מספר ההרצות האקראיות הנפרדות. יותר מסלולים נותנים תמונה יציבה יותר, אך דורשים יותר זמן חישוב.'],
+  ['מספר מסלולים', 'מספר ההרצות האקראיות הנפרדות. המחוון מאפשר עד 10,000 מסלולים; בהקלדה ידנית אפשר להזין עד 100,000 לבדיקת אירועים נדירים, במחיר של זמן חישוב ארוך יותר.'],
   ['תשואה שנתית צפויה', 'קצב התשואה השנתי שמשמש לחישוב רכיב התשואה היומי. זו הנחת מודל — לא התשואה השנתית שתתקבל בפועל ולא תחזית.'],
   ['תנודתיות שנתית', 'מידת הפיזור של התשואות סביב הממוצע. ערך גבוה מייצר עליות וירידות חדות יותר.'],
   ['רמות מינוף', 'המכפילים שמושווים זה לזה. המינוף מוחל על התשואה היומית ולכן גם הפסדים ותנודתיות מוגברים.'],

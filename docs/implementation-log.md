@@ -124,3 +124,10 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - Release evidence: `npm run check:release` passed with 45 unit/component tests and 18 desktop/mobile Playwright tests; the production artifact commit marker matched Git HEAD; the dated FRED reproduction returned excess kurtosis `15.833504835144865` and fitted `df = 4.378943263823818`.
 - Codex read-only audit found and triggered fixes for CVaR wording, compatibility and approval ambiguity, missing methodological provenance, ADR evidence links, a committed calibration result, and deterministic commit-aware live-site verification.
 - Pre-marker live evidence confirmed HTTP 200, the expected product title, and non-empty production JavaScript/CSS assets; the commit-aware live gate is verified after deployment.
+
+## 2026-08-30 — Soft limit for simulation paths
+
+- Limited the standard paths slider to 10,000 while preserving manual input, shared URLs and saved browser parameters up to the existing validated maximum of 100,000.
+- Values above 10,000 keep their exact numeric value, pin the slider thumb to its upper end and show an accessible warning that heavier runs are mainly useful for rare-event analysis.
+- The simulation engine, default path count, parameter schema and validation limits remain unchanged.
+- TDD evidence: the targeted component test first failed because the advisory was absent, then passed after separate numeric-input and slider bounds were implemented.
