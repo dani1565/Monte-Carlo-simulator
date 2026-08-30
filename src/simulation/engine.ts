@@ -10,6 +10,7 @@ export function simulate(params: SimulationParams, onProgress?: (progress: numbe
   const random = new SeededRandom(params.seed)
   const values = params.leverages.map(() => new Float64Array(params.paths).fill(params.initialInvestment))
   const wipedOut = params.leverages.map(() => new Uint8Array(params.paths))
+  const valueLimitExceeded = params.leverages.map(() => new Uint8Array(params.paths))
   const samples: SamplePath[][] = params.leverages.map(() =>
     Array.from({ length: Math.min(SAMPLE_COUNT, params.paths) }, () => ({ wipedOut: false, values: [params.initialInvestment] })),
   )
@@ -33,6 +34,7 @@ export function simulate(params: SimulationParams, onProgress?: (progress: numbe
               samples[leverageIndex][path].wipeoutYear = year - 1 + day / params.tradingDays
             }
           } else {
+            if (next > MAX_PORTFOLIO_VALUE) valueLimitExceeded[leverageIndex][path] = 1
             values[leverageIndex][path] = Math.min(next, MAX_PORTFOLIO_VALUE)
           }
         })
@@ -49,10 +51,13 @@ export function simulate(params: SimulationParams, onProgress?: (progress: numbe
     const finals = Array.from(values[index]).sort((a, b) => a - b)
     const median = percentile(finals, 0.5)
     const wipedOutCount = wipedOut[index].reduce((sum, value) => sum + value, 0)
+    const valueLimitExceededCount = valueLimitExceeded[index].reduce((sum, value) => sum + value, 0)
     return {
       leverage,
       wipeoutRate: wipedOutCount / params.paths,
       wipedOutCount,
+      valueLimitExceededRate: valueLimitExceededCount / params.paths,
+      valueLimitExceededCount,
       mean: mean(finals),
       median,
       cvar: expectedShortfall(finals, params.cvarPercentile),
@@ -67,7 +72,7 @@ export function simulate(params: SimulationParams, onProgress?: (progress: numbe
       histogram: createHistogram(finals),
     }
   })
-  return { params, results, durationMs: performance.now() - started }
+  return { params, results, portfolioValueLimit: MAX_PORTFOLIO_VALUE, durationMs: performance.now() - started }
 }
 
 function summaryPoint(year: number, source: Float64Array): TimePoint {

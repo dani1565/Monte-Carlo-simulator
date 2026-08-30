@@ -61,12 +61,14 @@ export default function App() {
   }, [params.leverages, selectedLeverage])
 
   const selectedResult = result?.results.find((item) => item.leverage === selectedLeverage) ?? result?.results[0]
+  const affectedResults = result?.results.filter((item) => item.valueLimitExceededCount > 0) ?? []
   const computeLabel = params.paths <= 5_000 ? 'חישוב קל' : params.paths <= 10_000 ? 'חישוב בינוני' : 'חישוב כבד'
   const pathsAdvisory = !validationErrors.paths && params.paths > 10_000
     ? 'מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב.'
     : undefined
   const insight = useMemo(() => {
     if (!selectedResult) return ''
+    if (selectedResult.valueLimitExceededCount > 0) return `במינוף ${selectedResult.leverage}×, ${selectedResult.valueLimitExceededCount.toLocaleString('he-IL')} מסלולים עברו את תקרת החישוב. לכן מדדי השווי המסומנים הם חסמים תחתונים, ולא מוצג פער בין הממוצע לחציון.`
     const gap = selectedResult.median > 0 ? selectedResult.mean / selectedResult.median : Infinity
     if (selectedResult.wipeoutRate > .25) return `במינוף ${selectedResult.leverage}×, ${percent(selectedResult.wipeoutRate)} מהמסלולים הגיעו לאפס. הממוצע אינו מספר את הסיפור של המשקיע הטיפוסי.`
     if (gap > 2) return `הממוצע גבוה פי ${formatNumber(gap)} מהחציון — מעט תוצאות חריגות מושכות אותו כלפי מעלה.`
@@ -149,6 +151,10 @@ export default function App() {
         <section className="dashboard" aria-live="polite">
           <div className="section-title"><div><p className="eyebrow">תמונת מצב</p><h3>מה קרה לכסף?</h3></div>{result && <span>{result.params.paths.toLocaleString('he-IL')} מסלולים · {result.params.years} שנים · {(result.durationMs / 1000).toFixed(1)} שנ׳</span>}</div>
           {result ? <>
+            {affectedResults.length > 0 && <section className="value-limit-warning" role="alert" aria-label="חריגה מתקרת החישוב">
+              <div><strong>התוצאה חורגת מתקרת החישוב של {formatPortfolioValueLimit(result.portfolioValueLimit)}</strong><p>ערכים גבוהים יותר נשמרו בגובה התקרה לצורך יציבות חישובית. מדדי השווי והגרפים המסומנים ב־≥ הם חסמים תחתונים; שיעור המחיקה נשאר מדויק.</p></div>
+              <ul>{affectedResults.map((item) => <li key={item.leverage}>מינוף {item.leverage}×: {item.valueLimitExceededCount.toLocaleString('he-IL')} מתוך {result.params.paths.toLocaleString('he-IL')} מסלולים ({percent(item.valueLimitExceededRate)})</li>)}</ul>
+            </section>}
             <div className="metric-grid">{result.results.map((item) => <MetricCard key={item.leverage} item={item} initialInvestment={result.params.initialInvestment} active={selectedLeverage === item.leverage} onClick={() => setSelectedLeverage(item.leverage)} />)}</div>
             <div className="insight"><span>!</span><div><strong>המספר שכדאי לראות</strong><p>{insight}</p></div></div>
             <div className="chart-panel">
@@ -161,8 +167,8 @@ export default function App() {
               <DistributionChart results={result.results} selected={selectedLeverage} initialInvestment={result.params.initialInvestment} />
             </div>
             {selectedResult && <div className="tail-panels">
-              <div className="tail-panel"><div><p className="eyebrow">התרחיש הרע</p><h3>אם נופלים לזנב, כמה כואב?</h3><p>ב־{result.params.cvarPercentile * 100}% התרחישים הגרועים, השווי הסופי הממוצע הוא <b>{formatCurrency(selectedResult.cvar)}</b> ({formatMultiple(selectedResult.cvar / result.params.initialInvestment)}).</p></div><div className="tail-number">{formatCurrency(selectedResult.cvar)}<small>CVaR</small></div></div>
-              <div className="tail-panel positive-tail"><div><p className="eyebrow">התרחיש הטוב</p><h3>מה קורה בזנב החיובי?</h3><p>ב־{result.params.positiveTailPercentile * 100}% התרחישים הטובים ביותר, השווי הסופי הממוצע הוא <b>{formatCurrency(selectedResult.positiveTailAverage)}</b> ({formatMultiple(selectedResult.positiveTailAverage / result.params.initialInvestment)}).</p></div><div className="tail-number">{formatCurrency(selectedResult.positiveTailAverage)}<small>ממוצע זנב חיובי</small></div></div>
+              <div className="tail-panel"><div><p className="eyebrow">התרחיש הרע</p><h3>אם נופלים לזנב, כמה כואב?</h3><p>ב־{result.params.cvarPercentile * 100}% התרחישים הגרועים, השווי הסופי הממוצע הוא <b><ValueDisplay value={formatCurrency(selectedResult.cvar)} lowerBound={selectedResult.valueLimitExceededCount > 0} /></b> (<ValueDisplay value={formatMultiple(selectedResult.cvar / result.params.initialInvestment)} lowerBound={selectedResult.valueLimitExceededCount > 0} />).</p></div><div className="tail-number"><ValueDisplay value={formatCurrency(selectedResult.cvar)} lowerBound={selectedResult.valueLimitExceededCount > 0} /><small>CVaR</small></div></div>
+              <div className="tail-panel positive-tail"><div><p className="eyebrow">התרחיש הטוב</p><h3>מה קורה בזנב החיובי?</h3><p>ב־{result.params.positiveTailPercentile * 100}% התרחישים הטובים ביותר, השווי הסופי הממוצע הוא <b><ValueDisplay value={formatCurrency(selectedResult.positiveTailAverage)} lowerBound={selectedResult.valueLimitExceededCount > 0} /></b> (<ValueDisplay value={formatMultiple(selectedResult.positiveTailAverage / result.params.initialInvestment)} lowerBound={selectedResult.valueLimitExceededCount > 0} />).</p></div><div className="tail-number"><ValueDisplay value={formatCurrency(selectedResult.positiveTailAverage)} lowerBound={selectedResult.valueLimitExceededCount > 0} /><small>ממוצע זנב חיובי</small></div></div>
             </div>}
           </> : <LoadingCards />}
         </section>
@@ -236,16 +242,24 @@ function ParameterGlossary() {
 
 function MetricCard({ item, initialInvestment, active, onClick }: { item: SimulationResult['results'][number]; initialInvestment: number; active: boolean; onClick: () => void }) {
   const gap = item.median ? item.mean / item.median : Infinity
+  const lowerBound = item.valueLimitExceededCount > 0
   return <button className={`metric-card ${active ? 'active' : ''}`} onClick={onClick} style={{ '--accent': leverageColor(item.leverage) } as React.CSSProperties}>
-    <div className="metric-top"><strong>{item.leverage}×</strong><span>מינוף יומי</span></div>
-    <div className="metric-main"><small>שווי חציוני</small><b>{formatCurrency(item.median)}</b><small>{formatMultiple(item.median / initialInvestment)}</small><span className={item.annualizedMedian >= 0 ? 'positive' : 'negative'}>{percent(item.annualizedMedian)} לשנה</span></div>
-    <div className="metric-details"><span><small>ממוצע</small><b>{formatCurrency(item.mean)}</b></span><span><small>מחיקה מלאה</small><b className={item.wipeoutRate > .1 ? 'negative' : ''}>{percent(item.wipeoutRate)}</b></span></div>
-    <div className="gap-bar"><span style={{ width: `${Math.min(100, Number.isFinite(gap) ? gap * 16 : 100)}%` }} /></div><p>פער ממוצע–חציון {Number.isFinite(gap) ? `פי ${formatNumber(gap)}` : 'קיצוני'}</p>
+    <div className="metric-top"><strong>{item.leverage}×</strong>{lowerBound ? <span className="lower-bound-badge">חסם תחתון</span> : <span>מינוף יומי</span>}</div>
+    <div className="metric-main"><small>שווי חציוני</small><b><ValueDisplay value={formatCurrency(item.median)} lowerBound={lowerBound} /></b><small><ValueDisplay value={formatMultiple(item.median / initialInvestment)} lowerBound={lowerBound} /></small><span className={item.annualizedMedian >= 0 ? 'positive' : 'negative'}><ValueDisplay value={`${percent(item.annualizedMedian)} לשנה`} lowerBound={lowerBound} /></span></div>
+    <div className="metric-details"><span><small>ממוצע</small><b><ValueDisplay value={formatCurrency(item.mean)} lowerBound={lowerBound} /></b></span><span><small>מחיקה מלאה</small><b className={item.wipeoutRate > .1 ? 'negative' : ''}>{percent(item.wipeoutRate)}</b></span></div>
+    {lowerBound ? <p className="gap-unavailable">פער ממוצע–חציון אינו זמין עקב החריגה</p> : <><div className="gap-bar"><span style={{ width: `${Math.min(100, Number.isFinite(gap) ? gap * 16 : 100)}%` }} /></div><p>פער ממוצע–חציון {Number.isFinite(gap) ? `פי ${formatNumber(gap)}` : 'קיצוני'}</p></>}
   </button>
 }
 
 function ChartHeader({ title, subtitle, results, selected, onSelect }: { title: string; subtitle: string; results: SimulationResult['results']; selected: number; onSelect: (value: number) => void }) {
-  return <div className="chart-header"><div><h3>{title}</h3><p>{subtitle}</p></div><div className="chart-tabs">{results.map((item) => <button key={item.leverage} className={selected === item.leverage ? 'active' : ''} onClick={() => onSelect(item.leverage)}>{item.leverage}×</button>)}</div></div>
+  const selectedResult = results.find((item) => item.leverage === selected) ?? results[0]
+  const lowerBound = selectedResult.valueLimitExceededCount > 0
+  return <div className="chart-header"><div><h3>{title}</h3><p>{subtitle}{lowerBound && <> · <strong className="chart-lower-bound">הגרף המסומן הוא חסם תחתון (≥)</strong></>}</p></div><div className="chart-tabs">{results.map((item) => <button key={item.leverage} className={selected === item.leverage ? 'active' : ''} onClick={() => onSelect(item.leverage)} aria-label={`${item.valueLimitExceededCount > 0 ? 'חסם תחתון, ' : ''}מינוף ${item.leverage}`}><span aria-hidden="true">{item.valueLimitExceededCount > 0 ? '≥ ' : ''}{item.leverage}×</span></button>)}</div></div>
+}
+
+function ValueDisplay({ value, lowerBound }: { value: string; lowerBound: boolean }) {
+  if (!lowerBound) return <>{value}</>
+  return <span className="lower-bound-value" aria-label={`לפחות ${value}`}><span aria-hidden="true">≥ </span><span aria-hidden="true">{value}</span></span>
 }
 
 function LoadingCards() { return <div className="loading-cards">{[1, 2, 3].map((item) => <div key={item} />)}</div> }
@@ -263,5 +277,6 @@ function paramsToDrafts(params: SimulationParams) {
 function percent(value: number) { return new Intl.NumberFormat('he-IL', { style: 'percent', maximumFractionDigits: 1 }).format(value) }
 function formatNumber(value: number) { return new Intl.NumberFormat('he-IL', { maximumFractionDigits: 1 }).format(value) }
 function formatCurrency(value: number) { return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0, notation: value >= 1e7 ? 'compact' : 'standard' }).format(value) }
+function formatPortfolioValueLimit(value: number) { return value === 1e15 ? '10¹⁵ ₪' : formatCurrency(value) }
 function formatMultiple(value: number) { if (!Number.isFinite(value)) return 'חריג'; if (value >= 1e6) return `${formatNumber(value / 1e6)}M×`; if (value >= 1000) return `${formatNumber(value / 1000)}K×`; return `${formatNumber(value)}×` }
 function tailLabel(df: number) { if (df <= 5) return 'זנבות שמנים מאוד'; if (df <= 10) return 'זנבות שמנים'; if (df <= 20) return 'זנבות מתונים'; return 'זנבות דקים' }
