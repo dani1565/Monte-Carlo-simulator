@@ -70,6 +70,17 @@ npm run --silent calibrate:sp500-tail > docs/research/sp500-tail-calibration-201
 - `df = 4.1` מתאים לבדיקת קיצון חזקה יותר; הוא אינו ברירת מחדל ולא כיול היסטורי נקי.
 - חלון זמן, תדירות, שיטת תשואה ואומד הקורטוזיס יכולים לשנות את התוצאה.
 
+## המרת תשואה שנתית לרכיב יומי
+
+התשואה השנתית שהמשתמש מזין מפורשת כתשואה מצטברת. רכיב התשואה היומי הקבוע מחושב מן הזהות האלגברית:
+
+```text
+(1 + daily_return)^trading_days = 1 + annual_return
+daily_return = (1 + annual_return)^(1 / trading_days) - 1
+```
+
+זו המרת יחידות של פרמטר המודל ולא כיול היסטורי. התנודתיות ממשיכה לעבור סקיילינג של `σ / √D`; ההגרלות, נרמול Student-t וערכי ה־presets אינם משתנים. ראו ADR 0009.
+
 ## מקורות מתודולוגיים
 
 - NIST/SEMATECH e-Handbook, “t Distribution”: https://www.itl.nist.gov/div898/handbook/eda/section3/eda3664.htm — מקור לתכונות התפלגות Student-t. גורם הנרמול במודל נובע מהשונות `df/(df-2)`, וההמרה `df = 4 + 6/kurtosis` נובעת מעודף הקורטוזיס `6/(df-4)` כאשר `df > 4`.

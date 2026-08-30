@@ -15,7 +15,7 @@ export function simulate(params: SimulationParams, onProgress?: (progress: numbe
     Array.from({ length: Math.min(SAMPLE_COUNT, params.paths) }, () => ({ wipedOut: false, values: [params.initialInvestment] })),
   )
   const timelines: TimePoint[][] = params.leverages.map(() => [summaryPoint(0, new Float64Array(params.paths).fill(params.initialInvestment))])
-  const dailyDrift = params.annualDrift / params.tradingDays
+  const dailyDrift = Math.expm1(Math.log1p(params.annualDrift) / params.tradingDays)
   const dailyVolatility = params.annualVolatility / Math.sqrt(params.tradingDays)
   const tailScale = Math.sqrt((params.degreesOfFreedom - 2) / params.degreesOfFreedom)
 
