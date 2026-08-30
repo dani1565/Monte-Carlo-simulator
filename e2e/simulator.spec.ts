@@ -32,6 +32,14 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
   await expect(page.getByText(/הברבור השחור.*נאסים ניקולס טאלב/)).toBeVisible()
   await expect(page.getByText(/גם סימולציה מוגבלת להנחות/)).toBeVisible()
 
+  const helpToggles = page.getByRole('button', { name: 'הסבר ודוגמה' })
+  await expect(helpToggles).toHaveCount(11)
+  const volatilityField = page.locator('.parameter-field').filter({ has: page.locator('#annualVolatility') })
+  await expect(volatilityField.locator('.field-description')).toHaveText('קובעת עד כמה התשואות עשויות לסטות מהממוצע.')
+  await expect(volatilityField.locator('.field-description')).toHaveCSS('font-size', '12px')
+  await volatilityField.getByRole('button', { name: 'הסבר ודוגמה' }).click()
+  await expect(volatilityField.getByText(/תנודתיות של 30%.*מתנודתיות של 15%/)).toBeVisible()
+
   const glossary = page.getByRole('group', { name: 'מה אומר כל פרמטר?' })
   await glossary.getByText('מה אומר כל פרמטר?', { exact: true }).focus()
   await page.keyboard.press('Enter')
@@ -136,7 +144,7 @@ test('עשרת אלפים מסלולים נשארים בתחום המחוון ב
   await page.goto(`/?${sharedScenario({ paths: '10000', years: '1', tradingDays: '1' })}`)
   await expect(page.getByRole('spinbutton', { name: 'מספר מסלולים' })).toHaveValue('10000')
   await expect(page.getByRole('slider', { name: 'מספר מסלולים — מחוון' })).toHaveValue('10000')
-  await expect(page.locator('#paths-description')).toHaveText('דגימות אקראיות · חישוב בינוני')
+  await expect(page.locator('#paths-description')).toHaveText('קובע כמה עתידים אקראיים הכלי בודק · חישוב בינוני')
   await expect(page.locator('#paths-advisory')).toHaveCount(0)
 })
 

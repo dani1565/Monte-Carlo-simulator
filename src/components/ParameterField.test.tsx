@@ -4,8 +4,38 @@ import { describe, expect, it, vi } from 'vitest'
 import { ParameterField } from './ParameterField'
 
 describe('ParameterField', () => {
+  it('מציג הסבר קצר קבוע ומרחיב פירוט מקומי נגיש לפי בקשת המשתמש', () => {
+    render(<ParameterField
+      id="volatility"
+      label="תנודתיות שנתית"
+      description="קובעת עד כמה התשואות עשויות לסטות מהממוצע."
+      details="ערך גבוה מייצר עליות וירידות חדות יותר."
+      unit="%"
+      value="18"
+      min={0}
+      max={200}
+      step={0.1}
+      onChange={() => undefined}
+    />)
+
+    const input = screen.getByLabelText('תנודתיות שנתית')
+    const toggle = screen.getByRole('button', { name: 'הסבר ודוגמה' })
+
+    expect(screen.getByText('קובעת עד כמה התשואות עשויות לסטות מהממוצע.')).toBeVisible()
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveAttribute('aria-controls', 'volatility-details')
+    expect(screen.getByText('ערך גבוה מייצר עליות וירידות חדות יותר.')).not.toBeVisible()
+    expect(input).toHaveAccessibleDescription('קובעת עד כמה התשואות עשויות לסטות מהממוצע.')
+
+    fireEvent.click(toggle)
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('ערך גבוה מייצר עליות וירידות חדות יותר.')).toBeVisible()
+    expect(input).toHaveAccessibleDescription('קובעת עד כמה התשואות עשויות לסטות מהממוצע. ערך גבוה מייצר עליות וירידות חדות יותר.')
+  })
+
   it('מקשר תווית, הסבר ושגיאה לשדה המספרי', () => {
-    render(<ParameterField id="years" label="טווח השקעה" description="משך הסימולציה" unit="שנים" value="0" min={1} max={100} step={1} error="מספר השנים אינו תקין" onChange={() => undefined} />)
+    render(<ParameterField id="years" label="טווח השקעה" description="משך הסימולציה" details="מספר השנים בכל מסלול." unit="שנים" value="0" min={1} max={100} step={1} error="מספר השנים אינו תקין" onChange={() => undefined} />)
     const input = screen.getByLabelText('טווח השקעה')
     expect(input).toHaveAttribute('aria-invalid', 'true')
     expect(input).toHaveAccessibleDescription('משך הסימולציה מספר השנים אינו תקין')
@@ -14,14 +44,14 @@ describe('ParameterField', () => {
 
   it('מעביר הקלדה מדויקת כמחרוזת בלי לתקן ערך לא חוקי', () => {
     const onChange = vi.fn()
-    render(<ParameterField id="return" label="תשואה" description="באחוזים" unit="%" value="9" min={-100} max={100} step={0.1} onChange={onChange} />)
+    render(<ParameterField id="return" label="תשואה" description="באחוזים" details="הנחת התשואה של המודל." unit="%" value="9" min={-100} max={100} step={0.1} onChange={onChange} />)
     fireEvent.change(screen.getByLabelText('תשואה'), { target: { value: '9.25' } })
     expect(onChange).toHaveBeenCalledWith('9.25')
   })
 
   it('מציג גם מחוון אופציונלי ששולט באותו ערך', () => {
     const onChange = vi.fn()
-    render(<ParameterField id="years" label="שנים" description="משך" unit="שנים" value="20" min={1} max={40} step={1} range onChange={onChange} />)
+    render(<ParameterField id="years" label="שנים" description="משך" details="מספר השנים בכל מסלול." unit="שנים" value="20" min={1} max={40} step={1} range onChange={onChange} />)
     fireEvent.change(screen.getByLabelText('שנים — מחוון'), { target: { value: '25' } })
     expect(onChange).toHaveBeenCalledWith('25')
   })
@@ -31,6 +61,7 @@ describe('ParameterField', () => {
       id="paths"
       label="מספר מסלולים"
       description="דגימות אקראיות · חישוב כבד"
+      details="מספר ההרצות האקראיות הנפרדות."
       unit="מסלולים"
       value="50000"
       min={100}
