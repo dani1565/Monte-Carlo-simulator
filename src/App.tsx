@@ -121,21 +121,21 @@ export default function App() {
           {shareFeedback && <p className="share-feedback" role="status">{shareFeedback}</p>}
           <fieldset className="parameter-section">
             <legend>הגדרות בסיסיות</legend>
-            <ParameterField id="initialInvestment" label="סכום התחלתי" description="שווי התיק בתחילת הדרך" unit="₪" value={drafts.initialInvestment} {...PARAMETER_LIMITS.initialInvestment} error={validationErrors.initialInvestment} onChange={(value) => updateNumber('initialInvestment', value)} />
-            <ParameterField id="years" label="טווח השקעה" description="משך הסימולציה" unit="שנים" value={drafts.years} {...PARAMETER_LIMITS.years} range error={validationErrors.years} onChange={(value) => updateNumber('years', value)} />
-            <ParameterField id="paths" label="מספר מסלולים" description={`דגימות אקראיות · ${computeLabel}`} unit="מסלולים" value={drafts.paths} {...PARAMETER_LIMITS.paths} rangeMax={10_000} range advisory={pathsAdvisory} error={validationErrors.paths} onChange={(value) => updateNumber('paths', value)} />
-            <ParameterField id="annualDrift" label="תשואה שנתית צפויה" description="קצב שנתי לחישוב רכיב התשואה היומי" unit="%" value={drafts.annualDrift} min={-100} max={100} step={0.1} range error={validationErrors.annualDrift} onChange={(value) => updateNumber('annualDrift', value, 100)} />
-            <ParameterField id="annualVolatility" label="תנודתיות שנתית" description="סטיית התקן השנתית" unit="%" value={drafts.annualVolatility} min={0} max={200} step={0.1} range error={validationErrors.annualVolatility} onChange={(value) => updateNumber('annualVolatility', value, 100)} />
-            <ParameterField id="leverages" label="רמות מינוף להשוואה" description="הפרידו ערכים בפסיקים, למשל 1, 2.5, 4" unit="×" inputType="text" value={drafts.leverages} min={PARAMETER_LIMITS.leverage.min} max={PARAMETER_LIMITS.leverage.max} step={PARAMETER_LIMITS.leverage.step} error={validationErrors.leverages} onChange={updateLeverages} />
+            <ParameterField id="initialInvestment" label="סכום התחלתי" description="קובע מאיזה שווי מתחיל כל מסלול." details={PARAMETER_HELP.initialInvestment.details} unit="₪" value={drafts.initialInvestment} {...PARAMETER_LIMITS.initialInvestment} error={validationErrors.initialInvestment} onChange={(value) => updateNumber('initialInvestment', value)} />
+            <ParameterField id="years" label="טווח השקעה" description="קובע כמה שנות שוק מדמה כל מסלול." details={PARAMETER_HELP.years.details} unit="שנים" value={drafts.years} {...PARAMETER_LIMITS.years} range error={validationErrors.years} onChange={(value) => updateNumber('years', value)} />
+            <ParameterField id="paths" label="מספר מסלולים" description={`קובע כמה עתידים אקראיים הכלי בודק · ${computeLabel}`} details={PARAMETER_HELP.paths.details} unit="מסלולים" value={drafts.paths} {...PARAMETER_LIMITS.paths} rangeMax={10_000} range advisory={pathsAdvisory} error={validationErrors.paths} onChange={(value) => updateNumber('paths', value)} />
+            <ParameterField id="annualDrift" label="תשואה שנתית צפויה" description="קובעת את קצב התשואה השנתי שממנו נגזרת התשואה היומית." details={PARAMETER_HELP.annualDrift.details} unit="%" value={drafts.annualDrift} min={-100} max={100} step={0.1} range error={validationErrors.annualDrift} onChange={(value) => updateNumber('annualDrift', value, 100)} />
+            <ParameterField id="annualVolatility" label="תנודתיות שנתית" description="קובעת עד כמה התשואות עשויות לסטות מהממוצע." details={PARAMETER_HELP.annualVolatility.details} unit="%" value={drafts.annualVolatility} min={0} max={200} step={0.1} range error={validationErrors.annualVolatility} onChange={(value) => updateNumber('annualVolatility', value, 100)} />
+            <ParameterField id="leverages" label="רמות מינוף להשוואה" description="קובעות אילו מכפילי מינוף יומי יושוו זה לזה." details={PARAMETER_HELP.leverages.details} unit="×" inputType="text" value={drafts.leverages} min={PARAMETER_LIMITS.leverage.min} max={PARAMETER_LIMITS.leverage.max} step={PARAMETER_LIMITS.leverage.step} error={validationErrors.leverages} onChange={updateLeverages} />
           </fieldset>
           <fieldset className="parameter-section advanced">
             <legend>הגדרות מתקדמות</legend>
-            <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={`${tailLabel(params.degreesOfFreedom)}. פחות דרגות חופש פירושן יותר אירועים חריגים (ברבורים שחורים).`} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
-            <ParameterField id="cvarPercentile" label="זנב CVaR" description="שיעור התרחישים הגרועים" unit="%" value={drafts.cvarPercentile} min={1} max={25} step={1} range error={validationErrors.cvarPercentile} onChange={(value) => updateNumber('cvarPercentile', value, 100)} />
-            <ParameterField id="positiveTailPercentile" label="זנב חיובי" description="שיעור התרחישים הטובים ביותר שממוצעם מוצג" unit="%" value={drafts.positiveTailPercentile} min={1} max={25} step={1} range error={validationErrors.positiveTailPercentile} onChange={(value) => updateNumber('positiveTailPercentile', value, 100)} />
-            <ParameterField id="seed" label="זרע אקראי" description="לשחזור אותה סדרת תרחישים" unit="seed" value={drafts.seed} {...PARAMETER_LIMITS.seed} error={validationErrors.seed} onChange={(value) => updateNumber('seed', value)} />
+            <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={`${tailLabel(params.degreesOfFreedom)}. פחות דרגות חופש פירושן יותר אירועים חריגים (ברבורים שחורים).`} details={PARAMETER_HELP.degreesOfFreedom.details} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
+            <ParameterField id="cvarPercentile" label="זנב CVaR" description="קובע איזה אחוז מהתרחישים הגרועים ייכלל בממוצע." details={PARAMETER_HELP.cvarPercentile.details} unit="%" value={drafts.cvarPercentile} min={1} max={25} step={1} range error={validationErrors.cvarPercentile} onChange={(value) => updateNumber('cvarPercentile', value, 100)} />
+            <ParameterField id="positiveTailPercentile" label="זנב חיובי" description="קובע איזה אחוז מהתרחישים הטובים ייכלל בממוצע." details={PARAMETER_HELP.positiveTailPercentile.details} unit="%" value={drafts.positiveTailPercentile} min={1} max={25} step={1} range error={validationErrors.positiveTailPercentile} onChange={(value) => updateNumber('positiveTailPercentile', value, 100)} />
+            <ParameterField id="seed" label="זרע אקראי" description="מאפשר לשחזר את אותה סדרת תרחישים להשוואה הוגנת." details={PARAMETER_HELP.seed.details} unit="seed" value={drafts.seed} {...PARAMETER_LIMITS.seed} error={validationErrors.seed} onChange={(value) => updateNumber('seed', value)} />
             <button className="random-seed" type="button" onClick={() => updateNumber('seed', String(Math.floor(Math.random() * 1_000_000)))}>↻ צור מדגם חדש</button>
-            <ParameterField id="tradingDays" label="ימי מסחר בשנה" description="משמש להמרה מפרמטרים שנתיים ליומיים" unit="ימים" value={drafts.tradingDays} {...PARAMETER_LIMITS.tradingDays} error={validationErrors.tradingDays} onChange={(value) => updateNumber('tradingDays', value)} />
+            <ParameterField id="tradingDays" label="ימי מסחר בשנה" description="קובע כמה צעדים יומיים יש בכל שנת סימולציה." details={PARAMETER_HELP.tradingDays.details} unit="ימים" value={drafts.tradingDays} {...PARAMETER_LIMITS.tradingDays} error={validationErrors.tradingDays} onChange={(value) => updateNumber('tradingDays', value)} />
           </fieldset>
           <button className="run-button" onClick={runSimulation} disabled={running || hasValidationErrors}>{running ? 'מחשב תרחישים…' : 'הרץ סימולציה'}<span>←</span></button>
           <p className="run-disclaimer">כלי כללי בלבד, ללא התאמה אישית ואינו תחליף לייעוץ מקצועי. מינוף עלול להביא לאובדן מלוא ההשקעה. <a href="#legal-disclaimer">להבהרה המשפטית המלאה</a></p>
@@ -176,19 +176,52 @@ export default function App() {
   )
 }
 
-const parameterExplanations = [
-  ['סכום התחלתי', 'הסכום שממנו מתחיל כל מסלול. התוצאות מוצגות גם בשקלים וגם כמכפיל של סכום זה.'],
-  ['טווח השקעה', 'מספר השנים שכל מסלול מדמה. אופק ארוך יוצר יותר ימי מסחר ויותר אפשרויות לתוצאות שונות.'],
-  ['מספר מסלולים', 'מספר ההרצות האקראיות הנפרדות. המחוון מאפשר עד 10,000 מסלולים; בהקלדה ידנית אפשר להזין עד 100,000 לבדיקת אירועים נדירים, במחיר של זמן חישוב ארוך יותר.'],
-  ['תשואה שנתית צפויה', 'קצב התשואה השנתי שמשמש לחישוב רכיב התשואה היומי. זו הנחת מודל — לא התשואה השנתית שתתקבל בפועל ולא תחזית.'],
-  ['תנודתיות שנתית', 'מידת הפיזור של התשואות סביב הממוצע. ערך גבוה מייצר עליות וירידות חדות יותר.'],
-  ['רמות מינוף', 'המכפילים שמושווים זה לזה. המינוף מוחל על התשואה היומית ולכן גם הפסדים ותנודתיות מוגברים.'],
-  ['עובי הזנבות', 'פרמטר טכני של התפלגות Student-t ששולט בתדירות של ימים קיצוניים. פחות דרגות חופש פירושן יותר אירועים חריגים (ברבורים שחורים), ולכן סיכון גדול יותר לקרן ממונפת.'],
-  ['זנב CVaR', 'האחוז מהתוצאות הסופיות הגרועות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הגרועים ביותר.'],
-  ['זנב חיובי', 'האחוז מהתוצאות הסופיות הטובות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הטובים ביותר.'],
-  ['זרע אקראי', 'מספר שמאפשר לשחזר בדיוק את אותה סדרת הגרלות ולהשוות שינויים בתנאים.'],
-  ['ימי מסחר בשנה', 'מספר הצעדים היומיים בכל שנת סימולציה; משמש להמרת תשואה ותנודתיות שנתיות לערכים יומיים.'],
-] as const
+const PARAMETER_HELP = {
+  initialInvestment: {
+    glossaryLabel: 'סכום התחלתי',
+    details: 'הסכום שממנו מתחיל כל מסלול. לדוגמה, בהשקעה של 100,000 ₪ התוצאות יוצגו גם בשקלים וגם כמכפיל של הסכום הזה.',
+  },
+  years: {
+    glossaryLabel: 'טווח השקעה',
+    details: 'מספר השנים שכל מסלול מדמה. לדוגמה, 20 שנים יוצרות 20 שנות צבירה; אופק ארוך מוסיף יותר ימי מסחר ויותר אפשרויות לתוצאות שונות.',
+  },
+  paths: {
+    glossaryLabel: 'מספר מסלולים',
+    details: 'מספר ההרצות האקראיות הנפרדות. לדוגמה, 10,000 מסלולים בודקים 10,000 עתידים אפשריים. בהקלדה ידנית אפשר להזין עד 100,000, במחיר של זמן חישוב ארוך יותר.',
+  },
+  annualDrift: {
+    glossaryLabel: 'תשואה שנתית צפויה',
+    details: 'קצב התשואה השנתי שמשמש לחישוב רכיב התשואה היומי. לדוגמה, 9% היא הנחת המודל שממנה נגזר הקצב היומי — לא תחזית ולא הבטחה לתשואה בפועל.',
+  },
+  annualVolatility: {
+    glossaryLabel: 'תנודתיות שנתית',
+    details: 'מידת הפיזור של התשואות סביב הממוצע. לדוגמה, תנודתיות של 30% תייצר בדרך כלל עליות וירידות חדות יותר מתנודתיות של 15%.',
+  },
+  leverages: {
+    glossaryLabel: 'רמות מינוף',
+    details: 'המכפילים שמושווים זה לזה. לדוגמה, מינוף 3× מכפיל כל תשואה יומית פי שלושה, ולכן גם הפסדים ותנודתיות מוגברים. מזינים כמה ערכים באמצעות פסיקים, למשל 1, 2.5, 4.',
+  },
+  degreesOfFreedom: {
+    glossaryLabel: 'עובי הזנבות',
+    details: 'פרמטר טכני של התפלגות Student-t ששולט בתדירות של ימים קיצוניים. לדוגמה, 4.2 מייצר זנבות כבדים יותר מ־10; פחות דרגות חופש פירושן יותר ברבורים שחורים וסיכון גדול יותר למינוף.',
+  },
+  cvarPercentile: {
+    glossaryLabel: 'זנב CVaR',
+    details: 'האחוז מהתוצאות הסופיות הגרועות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הגרועים ביותר.',
+  },
+  positiveTailPercentile: {
+    glossaryLabel: 'זנב חיובי',
+    details: 'האחוז מהתוצאות הסופיות הטובות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הטובים ביותר.',
+  },
+  seed: {
+    glossaryLabel: 'זרע אקראי',
+    details: 'מספר שמאפשר לשחזר בדיוק את אותה סדרת הגרלות. לדוגמה, השארת seed זהה בזמן שינוי המינוף מאפשרת להשוות את התנאים על אותם מסלולי שוק.',
+  },
+  tradingDays: {
+    glossaryLabel: 'ימי מסחר בשנה',
+    details: 'מספר הצעדים היומיים בכל שנת סימולציה. לדוגמה, 252 מייצג בקירוב שנת מסחר מקובלת ומשמש להמרת תשואה ותנודתיות שנתיות לערכים יומיים.',
+  },
+} as const
 
 function SimulationIntroduction() {
   return <section className="simulation-intro" aria-labelledby="simulation-intro-title">
@@ -208,7 +241,7 @@ function SimulationIntroduction() {
     <p className="model-warning"><strong>חשוב:</strong> זו סימולציה הסתברותית המבוססת על הנחות. היא אינה שחזור של ההיסטוריה, אינה משתמשת בנתוני שוק חיים ואינה תחזית או ייעוץ השקעות.</p>
     <details className="parameter-glossary" aria-label="מה אומר כל פרמטר?">
       <summary>מה אומר כל פרמטר?</summary>
-      <div className="glossary-grid">{parameterExplanations.map(([term, explanation]) => <article key={term}><h3>{term}</h3><p>{explanation}</p></article>)}</div>
+      <div className="glossary-grid">{Object.values(PARAMETER_HELP).map(({ glossaryLabel, details }) => <article key={glossaryLabel}><h3>{glossaryLabel}</h3><p>{details}</p></article>)}</div>
     </details>
   </section>
 }
