@@ -25,4 +25,30 @@ describe('ParameterField', () => {
     fireEvent.change(screen.getByLabelText('שנים — מחוון'), { target: { value: '25' } })
     expect(onChange).toHaveBeenCalledWith('25')
   })
+
+  it('מאפשר למחוון תקרה רכה נפרדת מתקרת הקלט ומנגיש הודעה צמודה', () => {
+    render(<ParameterField
+      id="paths"
+      label="מספר מסלולים"
+      description="דגימות אקראיות · חישוב כבד"
+      unit="מסלולים"
+      value="50000"
+      min={100}
+      max={100000}
+      rangeMax={10000}
+      step={100}
+      range
+      advisory="מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב."
+      onChange={() => undefined}
+    />)
+
+    const input = screen.getByLabelText('מספר מסלולים')
+    const slider = screen.getByLabelText('מספר מסלולים — מחוון')
+    expect(input).toHaveAttribute('max', '100000')
+    expect(input).toHaveAccessibleDescription('דגימות אקראיות · חישוב כבד מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב.')
+    expect(slider).toHaveAttribute('max', '10000')
+    expect(slider).toHaveValue('10000')
+    expect(slider).toHaveAccessibleDescription('דגימות אקראיות · חישוב כבד מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב.')
+    expect(screen.getByText('10000', { exact: true })).toBeInTheDocument()
+  })
 })
