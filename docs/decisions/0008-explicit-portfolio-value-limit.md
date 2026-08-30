@@ -3,7 +3,7 @@
 - מצב: Accepted
 - תאריך: 2026-08-31
 - Issue: https://github.com/dani1565/Monte-Carlo-simulator/issues/24
-- מימוש: יתווסף לאחר פתיחת ה־PR
+- מימוש: https://github.com/dani1565/Monte-Carlo-simulator/pull/25
 - בדיקות: `src/simulation/engine.test.ts`, `e2e/simulator.spec.ts`
 
 ## הקשר
