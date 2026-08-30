@@ -21,7 +21,7 @@ export function simulate(params: SimulationParams, onProgress?: (progress: numbe
   for (let year = 1; year <= params.years; year += 1) {
     for (let day = 0; day < params.tradingDays; day += 1) {
       for (let path = 0; path < params.paths; path += 1) {
-        const indexReturn = dailyDrift + dailyVolatility * random.studentT(params.degreesOfFreedom) * tailScale
+        const indexReturn = Math.max(-1, dailyDrift + dailyVolatility * random.studentT(params.degreesOfFreedom) * tailScale)
         params.leverages.forEach((leverage, leverageIndex) => {
           if (wipedOut[leverageIndex][path]) return
           const next = values[leverageIndex][path] * Math.max(0, 1 + leverage * indexReturn)

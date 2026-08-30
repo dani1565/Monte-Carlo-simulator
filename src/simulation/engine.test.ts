@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { SeededRandom } from './random'
 import { simulate } from './engine'
 import { expectedShortfall, percentile } from './statistics'
@@ -53,5 +53,40 @@ describe('מנוע הסימולציה', () => {
     })
     expect(result.results[0].wipeoutRate).toBe(1)
     expect(result.results[0].median).toBe(0)
+  })
+
+  it('חוסם תשואת מדד יומית ב־‎-100% לפני החלת המינוף', () => {
+    const result = simulate({
+      ...DEFAULT_SIMULATION_PARAMS,
+      initialInvestment: 100,
+      leverages: [0.5, 1, 2],
+      years: 1,
+      paths: 100,
+      annualDrift: -2,
+      annualVolatility: 0,
+      tradingDays: 1,
+    })
+
+    expect(result.results[0].median).toBe(50)
+    expect(result.results[0].wipeoutRate).toBe(0)
+    expect(result.results[1].median).toBe(0)
+    expect(result.results[1].wipeoutRate).toBe(1)
+    expect(result.results[2].median).toBe(0)
+    expect(result.results[2].wipeoutRate).toBe(1)
+  })
+
+  it('צורך הגרלת Student-t אחת לכל מסלול ויום גם כאשר התשואה נחסמת', () => {
+    const studentT = vi.spyOn(SeededRandom.prototype, 'studentT').mockReturnValue(-200)
+
+    simulate({
+      ...DEFAULT_SIMULATION_PARAMS,
+      leverages: [0.5, 1, 2],
+      years: 1,
+      paths: 100,
+      tradingDays: 2,
+    })
+
+    expect(studentT).toHaveBeenCalledTimes(200)
+    studentT.mockRestore()
   })
 })

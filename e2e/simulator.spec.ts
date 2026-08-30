@@ -5,6 +5,11 @@ test.beforeEach(async ({ page }) => {
     contentType: 'application/javascript',
     body: '',
   }))
+  await page.route('https://fonts.googleapis.com/**', async (route) => route.fulfill({
+    contentType: 'text/css',
+    body: '',
+  }))
+  await page.route('https://fonts.gstatic.com/**', async (route) => route.fulfill({ body: '' }))
 })
 
 function sharedScenario(overrides: Record<string, string> = {}) {
@@ -79,6 +84,10 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
   await volatilityField.getByRole('button', { name: 'הסבר ודוגמה' }).click()
   await expect(volatilityField.getByText(/תנודתיות של 30%.*מתנודתיות של 15%/)).toBeVisible()
 
+  const tailField = page.locator('.parameter-field').filter({ has: page.locator('#degreesOfFreedom') })
+  await tailField.getByRole('button', { name: 'הסבר ודוגמה' }).click()
+  await expect(tailField.getByText(/תשואת המדד היומית נעצרת ב־‎-100% לפני הכפלתה במינוף/)).toBeVisible()
+
   const glossary = page.getByRole('group', { name: 'מה אומר כל פרמטר?' })
   await glossary.getByText('מה אומר כל פרמטר?', { exact: true }).focus()
   await page.keyboard.press('Enter')
@@ -138,17 +147,53 @@ test('טוען מדידת שימוש מצרפית ומציג גילוי פרטי
 })
 
 test('סמל מצב החישוב בולט באדום וחוזר למצבו המוכן', async ({ page }) => {
-  await page.goto(`/?${sharedScenario({ paths: '10000', years: '10', tradingDays: '10' })}`)
+  await page.addInitScript(() => {
+    let finishSimulation = () => undefined
+    window.Worker = class {
+      onmessage: ((event: MessageEvent) => void) | null = null
+      onerror: OnErrorEventHandler = null
+
+      postMessage() {
+        const send = (data: unknown) => this.onmessage?.(new MessageEvent('message', { data }))
+        finishSimulation = () => send({ type: 'result', result: null })
+        send({ type: 'progress', progress: 0.5 })
+      }
+
+      terminate() {
+        finishSimulation = () => undefined
+      }
+    } as unknown as typeof Worker
+    Object.defineProperty(window, '__finishSimulationForTest', {
+      value: () => finishSimulation(),
+    })
+  })
+  await page.goto(`/?${sharedScenario({ paths: '100', years: '1', tradingDays: '1' })}`)
 
   const status = page.locator('.status-pill')
-  await expect(status).toContainText(/מחשב · \d+%/)
-  await expect(status).toHaveClass(/status-pill--running/)
-  await expect(status.locator('span')).toHaveCSS('background-color', 'rgb(255, 107, 114)')
+  await expect.poll(() => statusSnapshot(status)).toEqual({
+    text: expect.stringMatching(/מחשב · \d+%/),
+    className: expect.stringContaining('status-pill--running'),
+    color: 'rgb(255, 107, 114)',
+  })
 
-  await expect(status).toHaveText('המודל מוכן', { timeout: 30_000 })
-  await expect(status).not.toHaveClass(/status-pill--running/)
-  await expect(status.locator('span')).toHaveCSS('background-color', 'rgb(81, 229, 180)')
+  await page.evaluate(() => {
+    (window as typeof window & { __finishSimulationForTest: () => void }).__finishSimulationForTest()
+  })
+
+  await expect.poll(() => statusSnapshot(status), { timeout: 30_000 }).toEqual({
+    text: 'המודל מוכן',
+    className: 'status-pill',
+    color: 'rgb(81, 229, 180)',
+  })
 })
+
+async function statusSnapshot(status: import('@playwright/test').Locator) {
+  return status.evaluate((element) => ({
+    text: element.textContent,
+    className: element.className,
+    color: getComputedStyle(element.querySelector('span')!).backgroundColor,
+  }))
+}
 
 test('קישור משותף עם מאה אלף מסלולים נשאר חוקי ומצמיד את המחוון לתקרה הרכה', async ({ page }) => {
   await page.goto(`/?${sharedScenario({ paths: '100000', years: '1', tradingDays: '1' })}`)
