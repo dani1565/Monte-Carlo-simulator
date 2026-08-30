@@ -8,5 +8,6 @@ ADRs משמרים החלטות מהותיות והנימוקים שלהן. מס�
 - [0004 — preset זנב לחץ לברבורים שחורים](0004-black-swan-stress-preset.md)
 - [0005 — ממוצע זנב חיובי](0005-positive-tail-metric.md)
 - [0006 — analytics מצרפי וממוקד פרטיות](0006-privacy-first-aggregate-analytics.md)
+- [0007 — רצפת ‎-100% לתשואת מדד פשוטה](0007-bounded-simple-index-return.md)
 
 כל ADR חדש כולל: מצב, תאריך, הקשר, החלטה, חלופות, השלכות, דרישת אישור וקישורי PR/בדיקות.

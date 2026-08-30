@@ -79,6 +79,10 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
   await volatilityField.getByRole('button', { name: 'הסבר ודוגמה' }).click()
   await expect(volatilityField.getByText(/תנודתיות של 30%.*מתנודתיות של 15%/)).toBeVisible()
 
+  const tailField = page.locator('.parameter-field').filter({ has: page.locator('#degreesOfFreedom') })
+  await tailField.getByRole('button', { name: 'הסבר ודוגמה' }).click()
+  await expect(tailField.getByText(/תשואת המדד היומית נעצרת ב־‎-100% לפני הכפלתה במינוף/)).toBeVisible()
+
   const glossary = page.getByRole('group', { name: 'מה אומר כל פרמטר?' })
   await glossary.getByText('מה אומר כל פרמטר?', { exact: true }).focus()
   await page.keyboard.press('Enter')
