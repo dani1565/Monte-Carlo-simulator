@@ -5,6 +5,11 @@ test.beforeEach(async ({ page }) => {
     contentType: 'application/javascript',
     body: '',
   }))
+  await page.route('https://fonts.googleapis.com/**', async (route) => route.fulfill({
+    contentType: 'text/css',
+    body: '',
+  }))
+  await page.route('https://fonts.gstatic.com/**', async (route) => route.fulfill({ body: '' }))
 })
 
 function sharedScenario(overrides: Record<string, string> = {}) {
