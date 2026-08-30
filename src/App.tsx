@@ -152,7 +152,7 @@ export default function App() {
           <div className="section-title"><div><p className="eyebrow">תמונת מצב</p><h3>מה קרה לכסף?</h3></div>{result && <span>{result.params.paths.toLocaleString('he-IL')} מסלולים · {result.params.years} שנים · {(result.durationMs / 1000).toFixed(1)} שנ׳</span>}</div>
           {result ? <>
             {affectedResults.length > 0 && <section className="value-limit-warning" role="alert" aria-label="חריגה מתקרת החישוב">
-              <div><strong>התוצאה חורגת מתקרת החישוב של {formatPortfolioValueLimit(result.portfolioValueLimit)}</strong><p>ערכים גבוהים יותר נשמרו בגובה התקרה לצורך יציבות חישובית. מדדי השווי והגרפים המסומנים ב־≥ הם חסמים תחתונים; שיעור המחיקה נשאר מדויק.</p></div>
+              <div><strong>חלק ממסלולי הסימולציה חצו את רף החישוב העליון — {formatPortfolioValueLimit(result.portfolioValueLimit)}</strong><p>לכן תוצאות השווי ברמות המינוף המסומנות אינן מלאות: הערכים בפועל עשויים להיות גבוהים יותר, והם מוצגים כחסם תחתון (≥). שיעור המחיקה אינו מושפע.</p></div>
               <ul>{affectedResults.map((item) => <li key={item.leverage}>מינוף {item.leverage}×: {item.valueLimitExceededCount.toLocaleString('he-IL')} מתוך {result.params.paths.toLocaleString('he-IL')} מסלולים ({percent(item.valueLimitExceededRate)})</li>)}</ul>
             </section>}
             <div className="metric-grid">{result.results.map((item) => <MetricCard key={item.leverage} item={item} initialInvestment={result.params.initialInvestment} active={selectedLeverage === item.leverage} onClick={() => setSelectedLeverage(item.leverage)} />)}</div>
