@@ -11,8 +11,28 @@ const TOUR_STEPS: TourStep[] = [
     content: <>
       <p>הכלי מדמה <strong>מינוף יומי</strong>: בכל יום תשואת המדד מוכפלת ברמת המינוף, בדומה למודל מפושט של קרן ממונפת יומית. הוא אינו מדמה הלוואה, מרג׳ין או דרישות ביטחונות.</p>
       <div className="leverage-example" aria-label="דוגמה להשפעת מינוף יומי לאורך יומיים">
-        <div><span>מדד רגיל</span><strong dir="ltr">100 ← 110 ← 99</strong><small>יום של ‎+10%‎ ואחריו ‎-10%‎</small></div>
-        <div><span>מינוף יומי 3×</span><strong dir="ltr">100 ← 130 ← 91</strong><small>יום של ‎+30%‎ ואחריו ‎-30%‎</small></div>
+        <div>
+          <span>מדד רגיל</span>
+          <strong className="tour-sequence" dir="rtl" aria-label="מסלול המדד: 100, אחר כך 110, ולבסוף 99">
+            <span className="tour-sequence-value" aria-hidden="true">100</span>
+            <span className="tour-sequence-arrow" aria-hidden="true">←</span>
+            <span className="tour-sequence-value" aria-hidden="true">110</span>
+            <span className="tour-sequence-arrow" aria-hidden="true">←</span>
+            <span className="tour-sequence-value" aria-hidden="true">99</span>
+          </strong>
+          <small>יום של ‎+10%‎ ואחריו ‎-10%‎</small>
+        </div>
+        <div>
+          <span>מינוף יומי 3×</span>
+          <strong className="tour-sequence" dir="rtl" aria-label="מסלול המינוף היומי פי 3: 100, אחר כך 130, ולבסוף 91">
+            <span className="tour-sequence-value" aria-hidden="true">100</span>
+            <span className="tour-sequence-arrow" aria-hidden="true">←</span>
+            <span className="tour-sequence-value" aria-hidden="true">130</span>
+            <span className="tour-sequence-arrow" aria-hidden="true">←</span>
+            <span className="tour-sequence-value" aria-hidden="true">91</span>
+          </strong>
+          <small>יום של ‎+30%‎ ואחריו ‎-30%‎</small>
+        </div>
       </div>
       <p className="tour-takeaway"><strong>המסקנה:</strong> בגלל הצבירה היומית, התוצאה המצטברת אינה פשוט פי שלושה מתוצאת המדד.</p>
     </>,
@@ -34,7 +54,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     title: 'מהם ברבורים שחורים ולמה הם חשובים?',
     content: <>
-      <p>ברבור שחור הוא אירוע שוק נדיר וקיצוני — למשל נפילה חדה או פער פתיחה — שעלול לפגוע בתיק ממונף הרבה יותר מיום רגיל, משום שגם ההפסד היומי מוכפל.</p>
+      <p>ברבור שחור הוא אירוע שוק נדיר וקיצוני — למשל נפילה חדה או פער פתיחה — שעלול לפגוע בתיק ממונף הרבה יותר מיום רגיל, משום שגם ההפסד היומי מוכפל. אירועי קצה מופיעים בשווקים לעיתים קרובות יותר מכפי שמודל של תנודות רגילות עלול לגרום לנו לצפות, ולכן משקיעים צריכים להביא גם אותם בחשבון.</p>
       <p>פרמטר <strong>„עובי הזנבות”</strong> קובע כמה משקל המודל נותן לימים כאלה. <strong><span dir="ltr">df</span> נמוך יותר</strong> פירושו יותר תנועות קצה. המודל בוחן פגיעות לאירועים נדירים, אך אינו חוזה אירוע מסוים.</p>
     </>,
   },
