@@ -37,6 +37,7 @@ export interface HistogramBin {
 export interface LeverageResult {
   leverage: number
   wipeoutRate: number
+  valueLimitExceededRate: number
   mean: number
   median: number
   cvar: number
@@ -47,10 +48,12 @@ export interface LeverageResult {
   samples: SamplePath[]
   histogram: HistogramBin[]
   wipedOutCount: number
+  valueLimitExceededCount: number
 }
 
 export interface SimulationResult {
   params: SimulationParams
   results: LeverageResult[]
+  portfolioValueLimit: number
   durationMs: number
 }

@@ -89,4 +89,24 @@ describe('מנוע הסימולציה', () => {
     expect(studentT).toHaveBeenCalledTimes(200)
     studentT.mockRestore()
   })
+
+  it('מדווח פעם אחת על כל מסלול שעבר את תקרת החישוב ובנפרד לכל מינוף', () => {
+    const result = simulate({
+      ...DEFAULT_SIMULATION_PARAMS,
+      initialInvestment: 100_000,
+      leverages: [1, 20],
+      years: 20,
+      paths: 100,
+      annualDrift: 1,
+      annualVolatility: 0,
+      tradingDays: 1,
+    })
+
+    expect(result.portfolioValueLimit).toBe(1e15)
+    expect(result.results[0].valueLimitExceededCount).toBe(0)
+    expect(result.results[0].valueLimitExceededRate).toBe(0)
+    expect(result.results[1].valueLimitExceededCount).toBe(100)
+    expect(result.results[1].valueLimitExceededRate).toBe(1)
+    expect(result.results[1].median).toBe(1e15)
+  })
 })

@@ -228,6 +228,40 @@ test('טוען סימולציה, משנה פרמטר ושומר אותו', async
   expect(errors).toEqual([])
 })
 
+test('מציג חריגה מתקרת החישוב כחסם תחתון בלי לפגוע בשיעור המחיקה', async ({ page }) => {
+  await page.goto(`/?${sharedScenario({
+    leverages: '1,20', years: '20', paths: '100', annualDrift: '1',
+    annualVolatility: '0', tradingDays: '1',
+  })}`)
+
+  const warning = page.getByRole('alert', { name: 'חריגה מתקרת החישוב' })
+  await expect(warning).toContainText('התוצאה חורגת מתקרת החישוב של 10¹⁵ ₪')
+  await expect(warning).toContainText('מינוף 20×: 100 מתוך 100 מסלולים (100%)')
+
+  const unaffectedCard = page.locator('.metric-card').filter({ hasText: '1×' })
+  const affectedCard = page.locator('.metric-card').filter({ hasText: '20×' })
+  await expect(unaffectedCard.getByText('חסם תחתון')).toHaveCount(0)
+  await expect(affectedCard.getByText('חסם תחתון')).toBeVisible()
+  await expect(affectedCard.getByLabel(/^לפחות/)).toHaveCount(4)
+  await expect(affectedCard.getByText('פער ממוצע–חציון אינו זמין עקב החריגה')).toBeVisible()
+  await expect(affectedCard.getByText('מחיקה מלאה').locator('..').getByText('0%')).toBeVisible()
+
+  await affectedCard.click()
+  await expect(page.getByText('הגרף המסומן הוא חסם תחתון').first()).toBeVisible()
+  await expect(page.locator('.tail-panels').getByLabel(/^לפחות/)).toHaveCount(6)
+})
+
+test('אינו מציג אזהרת תקרה כאשר אף מסלול לא חרג', async ({ page }) => {
+  await page.goto(`/?${sharedScenario({
+    leverages: '1', years: '1', paths: '100', annualDrift: '0',
+    annualVolatility: '0', tradingDays: '1',
+  })}`)
+
+  await expect(page.getByText('שווי חציוני')).toBeVisible()
+  await expect(page.getByRole('alert', { name: 'חריגה מתקרת החישוב' })).toHaveCount(0)
+  await expect(page.getByLabel(/^לפחות/)).toHaveCount(0)
+})
+
 test('קלט לא תקין חוסם הרצה ומציג הודעה', async ({ page }) => {
   await page.goto(`/?${sharedScenario({ paths: '100', years: '1', tradingDays: '1' })}`)
   await page.getByRole('spinbutton', { name: 'מספר מסלולים' }).fill('100001')
