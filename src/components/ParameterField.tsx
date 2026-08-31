@@ -13,12 +13,13 @@ export interface ParameterFieldProps {
   step: number
   error?: string
   advisory?: string
+  advisoryTone?: 'moderate' | 'strong'
   range?: boolean
   inputType?: 'number' | 'text'
   onChange: (value: string) => void
 }
 
-export function ParameterField({ id, label, description, details, unit, value, min, max, rangeMax, step, error, advisory, range, inputType = 'number', onChange }: ParameterFieldProps) {
+export function ParameterField({ id, label, description, details, unit, value, min, max, rangeMax, step, error, advisory, advisoryTone = 'moderate', range, inputType = 'number', onChange }: ParameterFieldProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const descriptionId = `${id}-description`
   const detailsId = `${id}-details`
@@ -50,7 +51,7 @@ export function ParameterField({ id, label, description, details, unit, value, m
         <span className="field-help-chevron" aria-hidden="true">⌄</span>
       </button>
       <p id={detailsId} className="field-details" hidden={!detailsOpen}>{details}</p>
-      {advisory && <p id={advisoryId} className="field-advisory">{advisory}</p>}
+      {advisory && <p id={advisoryId} className={`field-advisory field-advisory--${advisoryTone}`}>{advisory}</p>}
       {error && <p id={errorId} className="field-error" role="alert">{error}</p>}
     </div>
   )

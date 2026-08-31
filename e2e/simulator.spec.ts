@@ -110,6 +110,50 @@ test('תרחיש S&P היסטורי מכוון לזנבות לחץ ומסביר 
   await expect(page.locator('.tour-step')).toContainText(/ברבור שחור הוא אירוע שוק נדיר וקיצוני/)
   await expect(page.locator('.tour-step')).toContainText(/פרמטר „עובי הזנבות” קובע כמה משקל המודל נותן לימים כאלה/)
   await expect(page.locator('#degreesOfFreedom-description')).toHaveText(/פחות דרגות חופש פירושן יותר אירועים חריגים \(ברבורים שחורים\)/)
+  await expect(page.locator('#degreesOfFreedom-advisory')).toHaveCount(0)
+})
+
+test('מזהיר מפני התכנסות חלשה ליד df=2 ומכמת את בסיס המדגם', async ({ page }) => {
+  await page.goto(`/?${sharedScenario({
+    degreesOfFreedom: '2.5', paths: '2000', years: '1', tradingDays: '1', annualVolatility: '0',
+  })}`)
+
+  const dfAdvisory = page.locator('#degreesOfFreedom-advisory')
+  await expect(dfAdvisory).toHaveClass(/field-advisory--strong/)
+  await expect(dfAdvisory).toContainText('אזהרת יציבות גבוהה')
+  await expect(dfAdvisory).toContainText('גם 100,000 מסלולים אינם מבטיחים התכנסות')
+
+  await expect(page.getByText('מה קרה לכסף?')).toBeVisible()
+  const selectedCard = page.locator('.metric-card').filter({ hasText: '3×' })
+  const wipeoutNote = selectedCard.locator('.wipeout-sampling-note')
+  await expect(wipeoutNote).toHaveClass(/sampling-note--strong/)
+  await expect(wipeoutNote).toContainText('0 מתוך 2,000 מסלולים')
+  await expect(wipeoutNote).toContainText(/רווח Wilson 95%: 0%–0\.19%/)
+  await expect(wipeoutNote).toContainText('מעט אירועים: שיעור המחיקה רועש מאוד')
+
+  const tailNotes = page.locator('.tail-sampling-note')
+  await expect(tailNotes).toHaveCount(2)
+  await expect(tailNotes.first()).toHaveText('המדד מבוסס על 100 מתוך 2,000 מסלולים.')
+  await expect(tailNotes.last()).toHaveText('המדד מבוסס על 100 מתוך 2,000 מסלולים.')
+})
+
+test('מבדיל בין אזהרות מתונות וחזקות לפי ספי df וגודל הזנב', async ({ page }) => {
+  await page.goto(`/?${sharedScenario({
+    degreesOfFreedom: '4', paths: '2000', years: '1', tradingDays: '1', annualVolatility: '0',
+    cvarPercentile: '0.01', positiveTailPercentile: '0.03',
+  })}`)
+
+  const dfAdvisory = page.locator('#degreesOfFreedom-advisory')
+  await expect(dfAdvisory).toHaveClass(/field-advisory--moderate/)
+  await expect(dfAdvisory).toContainText('ב־df עד 4 המומנט הרביעי אינו סופי')
+
+  const tailNotes = page.locator('.tail-sampling-note')
+  await expect(tailNotes.first()).toHaveClass(/sampling-note--strong/)
+  await expect(tailNotes.first()).toContainText('20 מתוך 2,000 מסלולים')
+  await expect(tailNotes.first()).toContainText('מעט מאוד תצפיות בזנב')
+  await expect(tailNotes.last()).toHaveClass(/sampling-note--moderate/)
+  await expect(tailNotes.last()).toContainText('60 מתוך 2,000 מסלולים')
+  await expect(tailNotes.last()).toContainText('מספר התצפיות בזנב מוגבל')
 })
 
 test('הסיור נשאר קומפקטי וללא גלילה אופקית במובייל', async ({ page }) => {

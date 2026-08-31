@@ -5,6 +5,14 @@ import { ParameterField } from './components/ParameterField'
 import { SimulationTour } from './components/SimulationTour'
 import { presets } from './presets'
 import { DEFAULT_SIMULATION_PARAMS, PARAMETER_LIMITS } from './simulation/defaults'
+import {
+  degreesOfFreedomWarningLevel,
+  eventCountWarningLevel,
+  tailObservationCount,
+  tailObservationWarningLevel,
+  wilson95Interval,
+} from './simulation/statisticalReliability'
+import type { StatisticalWarningLevel } from './simulation/statisticalReliability'
 import type { SimulationParams, SimulationResult } from './simulation/types'
 import { validateSimulationParams } from './simulation/validation'
 import { decodeParams, encodeParams, safeBrowserLoad, safeBrowserSave } from './state/parameterStorage'
@@ -66,6 +74,12 @@ export default function App() {
   const pathsAdvisory = !validationErrors.paths && params.paths > 10_000
     ? 'מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב.'
     : undefined
+  const dfWarningLevel = validationErrors.degreesOfFreedom ? null : degreesOfFreedomWarningLevel(params.degreesOfFreedom)
+  const dfAdvisory = dfWarningLevel === 'strong'
+    ? 'אזהרת יציבות גבוהה: ליד df=2 רוב השונות עלולה להגיע מאירועים נדירים שהמדגם לא ראה. גם 100,000 מסלולים אינם מבטיחים התכנסות; מומלץ להגדיל מסלולים ולבדוק כמה seeds.'
+    : dfWarningLevel === 'moderate'
+      ? 'אזהרת יציבות: ב־df עד 4 המומנט הרביעי אינו סופי, ולכן שונות ומדדי זנב עלולים להשתנות בין seeds. מומלץ להגדיל מסלולים ולבדוק כמה seeds.'
+      : undefined
   const insight = useMemo(() => {
     if (!selectedResult) return ''
     if (selectedResult.valueLimitExceededCount > 0) return `במינוף ${selectedResult.leverage}×, ${selectedResult.valueLimitExceededCount.toLocaleString('he-IL')} מסלולים עברו את תקרת החישוב. לכן מדדי השווי המסומנים הם חסמים תחתונים, ולא מוצג פער בין הממוצע לחציון.`
@@ -134,7 +148,7 @@ export default function App() {
           </fieldset>
           <fieldset className="parameter-section advanced">
             <legend>הגדרות מתקדמות</legend>
-            <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={`${tailLabel(params.degreesOfFreedom)}. פחות דרגות חופש פירושן יותר אירועים חריגים (ברבורים שחורים).`} details={PARAMETER_HELP.degreesOfFreedom.details} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
+            <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={`${tailLabel(params.degreesOfFreedom)}. פחות דרגות חופש פירושן יותר אירועים חריגים (ברבורים שחורים).`} details={PARAMETER_HELP.degreesOfFreedom.details} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range advisory={dfAdvisory} advisoryTone={dfWarningLevel ?? undefined} error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
             <ParameterField id="cvarPercentile" label="זנב CVaR" description="קובע איזה אחוז מהתרחישים הגרועים ייכלל בממוצע." details={PARAMETER_HELP.cvarPercentile.details} unit="%" value={drafts.cvarPercentile} min={1} max={25} step={1} range error={validationErrors.cvarPercentile} onChange={(value) => updateNumber('cvarPercentile', value, 100)} />
             <ParameterField id="positiveTailPercentile" label="זנב חיובי" description="קובע איזה אחוז מהתרחישים הטובים ייכלל בממוצע." details={PARAMETER_HELP.positiveTailPercentile.details} unit="%" value={drafts.positiveTailPercentile} min={1} max={25} step={1} range error={validationErrors.positiveTailPercentile} onChange={(value) => updateNumber('positiveTailPercentile', value, 100)} />
             <ParameterField id="seed" label="זרע אקראי" description="מאפשר לשחזר את אותה סדרת תרחישים להשוואה הוגנת." details={PARAMETER_HELP.seed.details} unit="seed" value={drafts.seed} {...PARAMETER_LIMITS.seed} error={validationErrors.seed} onChange={(value) => updateNumber('seed', value)} />
@@ -155,7 +169,7 @@ export default function App() {
               <div><strong>חלק ממסלולי הסימולציה חצו את רף החישוב העליון — {formatPortfolioValueLimit(result.portfolioValueLimit)}</strong><p>לכן תוצאות השווי ברמות המינוף המסומנות אינן מלאות: הערכים בפועל עשויים להיות גבוהים יותר, והם מוצגים כחסם תחתון (≥). שיעור המחיקה אינו מושפע.</p></div>
               <ul>{affectedResults.map((item) => <li key={item.leverage}>מינוף {item.leverage}×: {item.valueLimitExceededCount.toLocaleString('he-IL')} מתוך {result.params.paths.toLocaleString('he-IL')} מסלולים ({percent(item.valueLimitExceededRate)})</li>)}</ul>
             </section>}
-            <div className="metric-grid">{result.results.map((item) => <MetricCard key={item.leverage} item={item} initialInvestment={result.params.initialInvestment} active={selectedLeverage === item.leverage} onClick={() => setSelectedLeverage(item.leverage)} />)}</div>
+            <div className="metric-grid">{result.results.map((item) => <MetricCard key={item.leverage} item={item} initialInvestment={result.params.initialInvestment} paths={result.params.paths} active={selectedLeverage === item.leverage} onClick={() => setSelectedLeverage(item.leverage)} />)}</div>
             <div className="insight"><span>!</span><div><strong>המספר שכדאי לראות</strong><p>{insight}</p></div></div>
             <div className="chart-panel">
               <ChartHeader title="מסלולי עושר לאורך זמן" subtitle="סקאלה לוגריתמית · הרצועה מציגה את 50% האמצעיים" results={result.results} selected={selectedLeverage} onSelect={setSelectedLeverage} />
@@ -167,8 +181,8 @@ export default function App() {
               <DistributionChart results={result.results} selected={selectedLeverage} initialInvestment={result.params.initialInvestment} />
             </div>
             {selectedResult && <div className="tail-panels">
-              <div className="tail-panel"><div><p className="eyebrow">התרחיש הרע</p><h3>אם נופלים לזנב, כמה כואב?</h3><p>ב־{result.params.cvarPercentile * 100}% התרחישים הגרועים, השווי הסופי הממוצע הוא <b><ValueDisplay value={formatCurrency(selectedResult.cvar)} lowerBound={selectedResult.valueLimitExceededCount > 0} /></b> (<ValueDisplay value={formatMultiple(selectedResult.cvar / result.params.initialInvestment)} lowerBound={selectedResult.valueLimitExceededCount > 0} />).</p></div><div className="tail-number"><ValueDisplay value={formatCurrency(selectedResult.cvar)} lowerBound={selectedResult.valueLimitExceededCount > 0} /><small>CVaR</small></div></div>
-              <div className="tail-panel positive-tail"><div><p className="eyebrow">התרחיש הטוב</p><h3>מה קורה בזנב החיובי?</h3><p>ב־{result.params.positiveTailPercentile * 100}% התרחישים הטובים ביותר, השווי הסופי הממוצע הוא <b><ValueDisplay value={formatCurrency(selectedResult.positiveTailAverage)} lowerBound={selectedResult.valueLimitExceededCount > 0} /></b> (<ValueDisplay value={formatMultiple(selectedResult.positiveTailAverage / result.params.initialInvestment)} lowerBound={selectedResult.valueLimitExceededCount > 0} />).</p></div><div className="tail-number"><ValueDisplay value={formatCurrency(selectedResult.positiveTailAverage)} lowerBound={selectedResult.valueLimitExceededCount > 0} /><small>ממוצע זנב חיובי</small></div></div>
+              <div className="tail-panel"><div><p className="eyebrow">התרחיש הרע</p><h3>אם נופלים לזנב, כמה כואב?</h3><p>ב־{result.params.cvarPercentile * 100}% התרחישים הגרועים, השווי הסופי הממוצע הוא <b><ValueDisplay value={formatCurrency(selectedResult.cvar)} lowerBound={selectedResult.valueLimitExceededCount > 0} /></b> (<ValueDisplay value={formatMultiple(selectedResult.cvar / result.params.initialInvestment)} lowerBound={selectedResult.valueLimitExceededCount > 0} />).</p><TailSamplingNote paths={result.params.paths} percentile={result.params.cvarPercentile} /></div><div className="tail-number"><ValueDisplay value={formatCurrency(selectedResult.cvar)} lowerBound={selectedResult.valueLimitExceededCount > 0} /><small>CVaR</small></div></div>
+              <div className="tail-panel positive-tail"><div><p className="eyebrow">התרחיש הטוב</p><h3>מה קורה בזנב החיובי?</h3><p>ב־{result.params.positiveTailPercentile * 100}% התרחישים הטובים ביותר, השווי הסופי הממוצע הוא <b><ValueDisplay value={formatCurrency(selectedResult.positiveTailAverage)} lowerBound={selectedResult.valueLimitExceededCount > 0} /></b> (<ValueDisplay value={formatMultiple(selectedResult.positiveTailAverage / result.params.initialInvestment)} lowerBound={selectedResult.valueLimitExceededCount > 0} />).</p><TailSamplingNote paths={result.params.paths} percentile={result.params.positiveTailPercentile} /></div><div className="tail-number"><ValueDisplay value={formatCurrency(selectedResult.positiveTailAverage)} lowerBound={selectedResult.valueLimitExceededCount > 0} /><small>ממוצע זנב חיובי</small></div></div>
             </div>}
           </> : <LoadingCards />}
         </section>
@@ -195,7 +209,7 @@ const PARAMETER_HELP = {
   },
   paths: {
     glossaryLabel: 'מספר מסלולים',
-    details: 'מספר ההרצות האקראיות הנפרדות. לדוגמה, 10,000 מסלולים בודקים 10,000 עתידים אפשריים. בהקלדה ידנית אפשר להזין עד 100,000, במחיר של זמן חישוב ארוך יותר.',
+    details: 'מספר ההרצות האקראיות הנפרדות. לדוגמה, 10,000 מסלולים בודקים 10,000 עתידים אפשריים. אירוע נדיר עלול להופיע רק פעמים מעטות גם במדגם גדול, ולכן התוצאות מציגות את ספירת המחיקות ואת מספר התצפיות בזנב. בהקלדה ידנית אפשר להזין עד 100,000, במחיר של זמן חישוב ארוך יותר.',
   },
   annualDrift: {
     glossaryLabel: 'תשואה שנתית צפויה',
@@ -211,15 +225,15 @@ const PARAMETER_HELP = {
   },
   degreesOfFreedom: {
     glossaryLabel: 'עובי הזנבות',
-    details: 'פרמטר טכני של התפלגות Student-t ששולט בתדירות של ימים קיצוניים. לדוגמה, 4.2 מייצר זנבות כבדים יותר מ־10; פחות דרגות חופש פירושן יותר ברבורים שחורים וסיכון גדול יותר למינוף. תשואת המדד היומית נעצרת ב־‎-100% לפני הכפלתה במינוף, כדי שלא לייצר תשואה פשוטה בלתי אפשרית.',
+    details: 'פרמטר טכני של התפלגות Student-t ששולט בתדירות של ימים קיצוניים. לדוגמה, 4.2 מייצר זנבות כבדים יותר מ־10; פחות דרגות חופש פירושן יותר ברבורים שחורים וסיכון גדול יותר למינוף. ליד df=2 השונות התיאורטית אמנם סופית, אך מדגם עלול להחמיץ את האירועים הנדירים שנושאים אותה. תשואת המדד היומית נעצרת ב־‎-100% לפני הכפלתה במינוף, כדי שלא לייצר תשואה פשוטה בלתי אפשרית.',
   },
   cvarPercentile: {
     glossaryLabel: 'זנב CVaR',
-    details: 'האחוז מהתוצאות הסופיות הגרועות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הגרועים ביותר.',
+    details: 'האחוז מהתוצאות הסופיות הגרועות ביותר שהכלי ממוצע. לדוגמה, 5% מתוך 2,000 מסלולים מבוסס על 100 תוצאות בלבד; הממשק מציג את המספר בפועל ומזהיר כאשר בסיס המדגם קטן.',
   },
   positiveTailPercentile: {
     glossaryLabel: 'זנב חיובי',
-    details: 'האחוז מהתוצאות הסופיות הטובות ביותר שהכלי ממוצע. לדוגמה, 5% מציג את השווי הממוצע בתוך 5% המסלולים הטובים ביותר.',
+    details: 'האחוז מהתוצאות הסופיות הטובות ביותר שהכלי ממוצע. לדוגמה, 5% מתוך 2,000 מסלולים מבוסס על 100 תוצאות בלבד; תוצאות קצה חיוביות נדירות עלולות להשתנות בין seeds.',
   },
   seed: {
     glossaryLabel: 'זרע אקראי',
@@ -240,15 +254,42 @@ function ParameterGlossary() {
   </section>
 }
 
-function MetricCard({ item, initialInvestment, active, onClick }: { item: SimulationResult['results'][number]; initialInvestment: number; active: boolean; onClick: () => void }) {
+function MetricCard({ item, initialInvestment, paths, active, onClick }: { item: SimulationResult['results'][number]; initialInvestment: number; paths: number; active: boolean; onClick: () => void }) {
   const gap = item.median ? item.mean / item.median : Infinity
   const lowerBound = item.valueLimitExceededCount > 0
   return <button className={`metric-card ${active ? 'active' : ''}`} onClick={onClick} style={{ '--accent': leverageColor(item.leverage) } as React.CSSProperties}>
     <div className="metric-top"><strong>{item.leverage}×</strong>{lowerBound ? <span className="lower-bound-badge">חסם תחתון</span> : <span>מינוף יומי</span>}</div>
     <div className="metric-main"><small>שווי חציוני</small><b><ValueDisplay value={formatCurrency(item.median)} lowerBound={lowerBound} /></b><small><ValueDisplay value={formatMultiple(item.median / initialInvestment)} lowerBound={lowerBound} /></small><span className={item.annualizedMedian >= 0 ? 'positive' : 'negative'}><ValueDisplay value={`${percent(item.annualizedMedian)} לשנה`} lowerBound={lowerBound} /></span></div>
     <div className="metric-details"><span><small>ממוצע</small><b><ValueDisplay value={formatCurrency(item.mean)} lowerBound={lowerBound} /></b></span><span><small>מחיקה מלאה</small><b className={item.wipeoutRate > .1 ? 'negative' : ''}>{percent(item.wipeoutRate)}</b></span></div>
+    <WipeoutSamplingNote events={item.wipedOutCount} paths={paths} />
     {lowerBound ? <p className="gap-unavailable">פער ממוצע–חציון אינו זמין עקב החריגה</p> : <><div className="gap-bar"><span style={{ width: `${Math.min(100, Number.isFinite(gap) ? gap * 16 : 100)}%` }} /></div><p>פער ממוצע–חציון {Number.isFinite(gap) ? `פי ${formatNumber(gap)}` : 'קיצוני'}</p></>}
   </button>
+}
+
+function TailSamplingNote({ paths, percentile: percentileValue }: { paths: number; percentile: number }) {
+  const observations = tailObservationCount(paths, percentileValue)
+  const warningLevel = tailObservationWarningLevel(observations)
+  const warning = warningLevel === 'strong'
+    ? ' מעט מאוד תצפיות בזנב; התוצאה עלולה להשתנות מאוד בין seeds.'
+    : warningLevel === 'moderate'
+      ? ' מספר התצפיות בזנב מוגבל; מומלץ להגדיל מסלולים ולבדוק כמה seeds.'
+      : ''
+  return <p className={samplingNoteClass('tail-sampling-note', warningLevel)}>המדד מבוסס על {observations.toLocaleString('he-IL')} מתוך {paths.toLocaleString('he-IL')} מסלולים.{warning}</p>
+}
+
+function WipeoutSamplingNote({ events, paths }: { events: number; paths: number }) {
+  const interval = wilson95Interval(events, paths)
+  const warningLevel = eventCountWarningLevel(events)
+  const warning = warningLevel === 'strong'
+    ? ' מעט אירועים: שיעור המחיקה רועש מאוד.'
+    : warningLevel === 'moderate'
+      ? ' אי־ודאות מוגברת בגלל מספר אירועים מוגבל.'
+      : ''
+  return <p className={samplingNoteClass('wipeout-sampling-note', warningLevel)}>{events.toLocaleString('he-IL')} מתוך {paths.toLocaleString('he-IL')} מסלולים · רווח Wilson 95%: {statisticalPercent(interval.lower)}–{statisticalPercent(interval.upper)}.{warning}</p>
+}
+
+function samplingNoteClass(base: string, warningLevel: StatisticalWarningLevel) {
+  return `sampling-note ${base}${warningLevel ? ` sampling-note--${warningLevel}` : ''}`
 }
 
 function ChartHeader({ title, subtitle, results, selected, onSelect }: { title: string; subtitle: string; results: SimulationResult['results']; selected: number; onSelect: (value: number) => void }) {
@@ -275,6 +316,7 @@ function paramsToDrafts(params: SimulationParams) {
   }
 }
 function percent(value: number) { return new Intl.NumberFormat('he-IL', { style: 'percent', maximumFractionDigits: 1 }).format(value) }
+function statisticalPercent(value: number) { return new Intl.NumberFormat('he-IL', { style: 'percent', maximumFractionDigits: 2 }).format(value) }
 function formatNumber(value: number) { return new Intl.NumberFormat('he-IL', { maximumFractionDigits: 1 }).format(value) }
 function formatCurrency(value: number) { return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0, notation: value >= 1e7 ? 'compact' : 'standard' }).format(value) }
 function formatPortfolioValueLimit(value: number) { return value === 1e15 ? '10¹⁵ ₪' : formatCurrency(value) }

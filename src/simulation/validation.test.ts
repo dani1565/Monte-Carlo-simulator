@@ -7,6 +7,14 @@ describe('אימות פרמטרים', () => {
     expect(validateSimulationParams(DEFAULT_SIMULATION_PARAMS)).toEqual({})
   })
 
+  it('שומר תאימות לקישורים חוקיים עם df ומספר מסלולים בגבול הישן', () => {
+    expect(validateSimulationParams({
+      ...DEFAULT_SIMULATION_PARAMS,
+      degreesOfFreedom: 2.01,
+      paths: 100,
+    })).toEqual({})
+  })
+
   it.each([
     ['initialInvestment', 0, 'הסכום ההתחלתי חייב להיות בין 1 ל־1,000,000,000'],
     ['years', 1.5, 'מספר השנים חייב להיות מספר שלם בין 1 ל־100'],
