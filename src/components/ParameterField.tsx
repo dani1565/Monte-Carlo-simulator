@@ -16,10 +16,15 @@ export interface ParameterFieldProps {
   advisoryTone?: 'moderate' | 'strong'
   range?: boolean
   inputType?: 'number' | 'text'
+  action?: {
+    label: string
+    icon?: string
+    onClick: () => void
+  }
   onChange: (value: string) => void
 }
 
-export function ParameterField({ id, label, description, details, unit, value, min, max, rangeMax, step, error, advisory, advisoryTone = 'moderate', range, inputType = 'number', onChange }: ParameterFieldProps) {
+export function ParameterField({ id, label, description, details, unit, value, min, max, rangeMax, step, error, advisory, advisoryTone = 'moderate', range, inputType = 'number', action, onChange }: ParameterFieldProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const descriptionId = `${id}-description`
   const detailsId = `${id}-details`
@@ -41,6 +46,10 @@ export function ParameterField({ id, label, description, details, unit, value, m
         <input id={id} type={inputType} inputMode={inputType === 'number' ? 'decimal' : 'text'} value={value} min={inputType === 'number' ? min : undefined} max={inputType === 'number' ? max : undefined} step={inputType === 'number' ? step : undefined} aria-invalid={Boolean(error)} aria-describedby={describedBy} onChange={(event) => onChange(event.target.value)} />
         <span>{unit}</span>
       </div>
+      {action && <button className="parameter-field-action" type="button" onClick={action.onClick}>
+        {action.icon && <span className="parameter-field-action-icon" aria-hidden="true">{action.icon}</span>}
+        <span>{action.label}</span>
+      </button>}
       {range && <>
         <input className="range" aria-label={`${label} — מחוון`} aria-describedby={describedBy} type="range" min={min} max={sliderMax} step={step} value={sliderValue} style={{ '--fill': `${fill}%` } as React.CSSProperties} onChange={(event) => onChange(event.target.value)} />
         <div className="range-ends"><span>{min}</span><span>{sliderMax}</span></div>

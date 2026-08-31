@@ -49,6 +49,32 @@ describe('ParameterField', () => {
     expect(onChange).toHaveBeenCalledWith('9.25')
   })
 
+  it('מציג פעולה אופציונלית בתוך השדה ומפעיל אותה', () => {
+    const onAction = vi.fn()
+    render(<ParameterField
+      id="seed"
+      label="זרע אקראי (seed)"
+      description="seed קבוע משחזר את אותה סדרת תרחישים; seed חדש יוצר סדרה חדשה."
+      details="מספר שמאפשר לשחזר בדיוק את אותה סדרת הגרלות."
+      unit="seed"
+      value="2026"
+      min={0}
+      max={4_294_967_295}
+      step={1}
+      action={{ label: 'הגרל seed אקראי', icon: '↻', onClick: onAction }}
+      onChange={() => undefined}
+    />)
+
+    const button = screen.getByRole('button', { name: 'הגרל seed אקראי' })
+    expect(button).toHaveClass('parameter-field-action')
+    expect(button.closest('.parameter-field')).toBeInTheDocument()
+    expect(button.querySelector('[aria-hidden="true"]')).toHaveTextContent('↻')
+
+    fireEvent.click(button)
+
+    expect(onAction).toHaveBeenCalledOnce()
+  })
+
   it('מציג גם מחוון אופציונלי ששולט באותו ערך', () => {
     const onChange = vi.fn()
     render(<ParameterField id="years" label="שנים" description="משך" details="מספר השנים בכל מסלול." unit="שנים" value="20" min={1} max={40} step={1} range onChange={onChange} />)

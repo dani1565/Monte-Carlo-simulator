@@ -91,11 +91,35 @@ test('מסביר למשתמש מה הסימולציה עושה ומה משמעו
   const glossary = page.getByRole('group', { name: 'מה אומר כל פרמטר?' })
   await glossary.getByText('מה אומר כל פרמטר?', { exact: true }).focus()
   await page.keyboard.press('Enter')
-  for (const term of ['סכום התחלתי', 'טווח השקעה', 'מספר מסלולים', 'תשואה שנתית צפויה', 'תנודתיות שנתית', 'רמות מינוף', 'עובי הזנבות', 'זנב CVaR', 'זנב חיובי', 'זרע אקראי', 'ימי מסחר בשנה']) {
+  for (const term of ['סכום התחלתי', 'טווח השקעה', 'מספר מסלולים', 'תשואה שנתית צפויה', 'תנודתיות שנתית', 'רמות מינוף', 'עובי הזנבות', 'זנב CVaR', 'זנב חיובי', 'זרע אקראי (seed)', 'ימי מסחר בשנה']) {
     await expect(glossary.getByText(term, { exact: true })).toBeVisible()
   }
   await expect(glossary.getByText(/הסכום שממנו מתחיל כל מסלול/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'תרחיש לחץ בסגנון 2008' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+})
+
+test('קושר לשדה כפתור בולט שמגריל seed חדש', async ({ page }) => {
+  await page.addInitScript(() => {
+    Math.random = () => 0.123456789
+  })
+  await page.goto('/')
+
+  const input = page.getByRole('spinbutton', { name: 'זרע אקראי (seed)', exact: true })
+  const seedField = page.locator('.parameter-field').filter({ has: input })
+  const action = seedField.getByRole('button', { name: 'הגרל seed אקראי', exact: true })
+
+  await expect(seedField.locator('.field-description')).toHaveText('seed קבוע משחזר את אותה סדרת תרחישים; seed חדש יוצר סדרה חדשה.')
+  await expect(action).toBeVisible()
+
+  const [fieldBox, actionBox] = await Promise.all([seedField.boundingBox(), action.boundingBox()])
+  expect(fieldBox).not.toBeNull()
+  expect(actionBox).not.toBeNull()
+  expect(actionBox!.height).toBeGreaterThanOrEqual(44)
+  expect(Math.abs(actionBox!.width - fieldBox!.width)).toBeLessThanOrEqual(1)
+
+  await action.click()
+  await expect(input).toHaveValue('123456')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
 })
 
