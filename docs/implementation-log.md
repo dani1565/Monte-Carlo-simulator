@@ -131,3 +131,12 @@ An independent fail-closed review ran while the parameter slice was in its RED/i
 - Values above 10,000 keep their exact numeric value, pin the slider thumb to its upper end and show an accessible warning that heavier runs are mainly useful for rare-event analysis.
 - The simulation engine, default path count, parameter schema and validation limits remain unchanged.
 - TDD evidence: the targeted component test first failed because the advisory was absent, then passed after separate numeric-input and slider bounds were implemented.
+
+## 2026-08-31 — Statistical reliability disclosure
+
+- Preserved the approved return model, `df` range `2.01–100`, path range `100–100,000`, default of 2,000 paths, PRNG, presets and saved/shared parameter schema.
+- Added non-blocking convergence warnings: strong below `df = 3` and moderate for `3 ≤ df ≤ 4`.
+- Added the actual tail observation count to CVaR and the positive-tail average, with strong warnings below 30 observations and moderate warnings for 30–99.
+- Added wipeout counts and an analytic Wilson 95% interval, with strong rare-event warnings below 25 observed wipeouts and moderate warnings for 25–99.
+- TDD evidence: the reliability unit suite first failed because the module did not exist, then passed 6/6; the component test first failed because the strong advisory class was missing, then passed 6/6; the new desktop/mobile browser scenarios first failed because the `df` advisory was absent, then passed 4/4.
+- The deterministic research script and committed report separate the heavy-tail model limitation near `df = 2` from finite-sample Monte Carlo noise and quantify rare-event uncertainty in the built-in scenarios.

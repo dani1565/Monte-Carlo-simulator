@@ -16,6 +16,7 @@
     "check:release": "npm run check:full && npm run test:e2e",
     "check:build-meta": "node --experimental-strip-types scripts/check-build-meta.mts",
     "calibrate:sp500-tail": "node --experimental-strip-types scripts/calibrate-sp500-tail.mts",
+    "research:statistical-stability": "vite-node scripts/analyze-statistical-stability.mts",
     "verify:live": "node --experimental-strip-types scripts/verify-live-site.mts",
     "preview": "vite preview"
   },

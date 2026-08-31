@@ -104,3 +104,12 @@ Nassim Nicholas Taleb, *The Black Swan: The Impact of the Highly Improbable*, Ra
 - אין לשנות מספרים היסטוריים במסמך בלי להריץ את הסקריפט ולצרף פלט ו־commit.
 - שינוי חלון, מקור או אומד מחייב הסבר ב־PR ועדכון ADR אם משמעות ה־preset משתנה.
 - אין להוסיף הורדת נתונים למוצר עצמו בלי אישור בעלים; הסקריפט הוא כלי מחקר מבודד בלבד.
+
+## יציבות דגימה ואירועים נדירים
+
+הניסוי הדטרמיניסטי `scripts/analyze-statistical-stability.mts` מתעד את קצב ההתכנסות של ההלם המנורמל ושל מדדי שווי סופי ליד `df = 2`, ומחשב אנליטית הסתברויות מחיקה בתרחישים המובנים. המתודולוגיה, התוצאות והפרדת תכונת המודל מרעש מונטה־קרלו מתועדות ב־[`docs/research/statistical-stability-near-df2.md`](research/statistical-stability-near-df2.md); הפלט המלא נשמר ב־[`docs/research/statistical-stability-near-df2.json`](research/statistical-stability-near-df2.json).
+
+מקורות מתודולוגיים נוספים:
+
+- NIST/SEMATECH, “t Distribution”: השונות קיימת עבור `df > 2`, אך הקורטוזיס והמומנט הרביעי קיימים רק עבור `df > 4`.
+- Edwin B. Wilson, “Probable Inference, the Law of Succession, and Statistical Inference”, JASA 22(158), 1927, https://doi.org/10.1080/01621459.1927.10502953 — מקור לרווח הסמך הבינומי המוצע עבור שיעור המחיקה.

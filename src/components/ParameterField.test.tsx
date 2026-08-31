@@ -82,4 +82,26 @@ describe('ParameterField', () => {
     expect(slider).toHaveAccessibleDescription('דגימות אקראיות · חישוב כבד מעל 10,000 מסלולים שימושי בעיקר לבדיקת אירועים נדירים ועלול להאריך משמעותית את החישוב.')
     expect(screen.getByText('10000', { exact: true })).toBeInTheDocument()
   })
+
+  it('מסמן אזהרת יציבות חזקה ומקשר אותה לתיאור הנגיש של השדה', () => {
+    render(<ParameterField
+      id="degreesOfFreedom"
+      label="עובי הזנבות"
+      description="פחות דרגות חופש פירושן יותר אירועים חריגים."
+      details="פרמטר Student-t."
+      unit="df"
+      value="2.5"
+      min={2.01}
+      max={100}
+      step={0.1}
+      advisory="אזהרת יציבות גבוהה: המדגם עלול להחמיץ אירועים נדירים."
+      advisoryTone="strong"
+      onChange={() => undefined}
+    />)
+
+    const input = screen.getByLabelText('עובי הזנבות')
+    const advisory = screen.getByText('אזהרת יציבות גבוהה: המדגם עלול להחמיץ אירועים נדירים.')
+    expect(advisory).toHaveClass('field-advisory--strong')
+    expect(input).toHaveAccessibleDescription('פחות דרגות חופש פירושן יותר אירועים חריגים. אזהרת יציבות גבוהה: המדגם עלול להחמיץ אירועים נדירים.')
+  })
 })
