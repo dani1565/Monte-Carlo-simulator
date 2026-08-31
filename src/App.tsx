@@ -151,8 +151,7 @@ export default function App() {
             <ParameterField id="degreesOfFreedom" label="עובי הזנבות" description={`${tailLabel(params.degreesOfFreedom)}. פחות דרגות חופש פירושן יותר אירועים חריגים (ברבורים שחורים).`} details={PARAMETER_HELP.degreesOfFreedom.details} unit="df" value={drafts.degreesOfFreedom} {...PARAMETER_LIMITS.degreesOfFreedom} range advisory={dfAdvisory} advisoryTone={dfWarningLevel ?? undefined} error={validationErrors.degreesOfFreedom} onChange={(value) => updateNumber('degreesOfFreedom', value)} />
             <ParameterField id="cvarPercentile" label="זנב CVaR" description="קובע איזה אחוז מהתרחישים הגרועים ייכלל בממוצע." details={PARAMETER_HELP.cvarPercentile.details} unit="%" value={drafts.cvarPercentile} min={1} max={25} step={1} range error={validationErrors.cvarPercentile} onChange={(value) => updateNumber('cvarPercentile', value, 100)} />
             <ParameterField id="positiveTailPercentile" label="זנב חיובי" description="קובע איזה אחוז מהתרחישים הטובים ייכלל בממוצע." details={PARAMETER_HELP.positiveTailPercentile.details} unit="%" value={drafts.positiveTailPercentile} min={1} max={25} step={1} range error={validationErrors.positiveTailPercentile} onChange={(value) => updateNumber('positiveTailPercentile', value, 100)} />
-            <ParameterField id="seed" label="זרע אקראי" description="מאפשר לשחזר את אותה סדרת תרחישים להשוואה הוגנת." details={PARAMETER_HELP.seed.details} unit="seed" value={drafts.seed} {...PARAMETER_LIMITS.seed} error={validationErrors.seed} onChange={(value) => updateNumber('seed', value)} />
-            <button className="random-seed" type="button" onClick={() => updateNumber('seed', String(Math.floor(Math.random() * 1_000_000)))}>↻ צור מדגם חדש</button>
+            <ParameterField id="seed" label="זרע אקראי (seed)" description="seed קבוע משחזר את אותה סדרת תרחישים; seed חדש יוצר סדרה חדשה." details={PARAMETER_HELP.seed.details} unit="seed" value={drafts.seed} {...PARAMETER_LIMITS.seed} error={validationErrors.seed} action={{ label: 'הגרל seed אקראי', icon: '↻', onClick: () => updateNumber('seed', String(Math.floor(Math.random() * 1_000_000))) }} onChange={(value) => updateNumber('seed', value)} />
             <ParameterField id="tradingDays" label="ימי מסחר בשנה" description="קובע כמה צעדים יומיים יש בכל שנת סימולציה." details={PARAMETER_HELP.tradingDays.details} unit="ימים" value={drafts.tradingDays} {...PARAMETER_LIMITS.tradingDays} error={validationErrors.tradingDays} onChange={(value) => updateNumber('tradingDays', value)} />
           </fieldset>
           <button className="run-button" onClick={runSimulation} disabled={running || hasValidationErrors}>{running ? 'מחשב תרחישים…' : 'הרץ סימולציה'}<span>←</span></button>
@@ -236,7 +235,7 @@ const PARAMETER_HELP = {
     details: 'האחוז מהתוצאות הסופיות הטובות ביותר שהכלי ממוצע. לדוגמה, 5% מתוך 2,000 מסלולים מבוסס על 100 תוצאות בלבד; תוצאות קצה חיוביות נדירות עלולות להשתנות בין seeds.',
   },
   seed: {
-    glossaryLabel: 'זרע אקראי',
+    glossaryLabel: 'זרע אקראי (seed)',
     details: 'מספר שמאפשר לשחזר בדיוק את אותה סדרת הגרלות. לדוגמה, השארת seed זהה בזמן שינוי המינוף מאפשרת להשוות את התנאים על אותם מסלולי שוק.',
   },
   tradingDays: {
